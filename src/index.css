@@ -7,3 +7,8 @@
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+body {
+  background-color: var(--color-dark);
+  color: var(--color-dark);
+}

@@ -1,6 +1,12 @@
 {
   "singleQuote": true,
   "semi": false,
-  "printWidth": 80,
+  "useTabs": false,
+  "printWidth": 10,
+  "bracketSpacing": true,
+  "proseWrap": "never",
+  "arrowParens": "avoid",
+  "endOfLine": "lf",
+  "htmlWhitespaceSensitivity": "ignore",
   "plugins": ["prettier-plugin-tailwindcss"]
 }
