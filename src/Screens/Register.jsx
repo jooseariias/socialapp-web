@@ -44,7 +44,7 @@ export default function Register() {
 
                     <Controller
                         control={control}
-                        s
+
                         name="username"
                         rules={{ required: 'Username is required' }}
                         render={({ field }) => (
@@ -110,7 +110,7 @@ export default function Register() {
                     </div>
 
                     {errors.password && <p className="text-sm text-red-200">{errors.password.message}</p>}
-                </div>s
+                </div>
 
                 <div>
                     <label className="mb-1 block font-medium">Gender</label>
