@@ -1,8 +1,12 @@
+import { Routes, Route } from 'react-router-dom'
+import Login from '@/Screens/Login.jsx'
+
 function App() {
   return (
-    <>
-      <h1 className="text-center"> Hello Word</h1>
-    </>
+    <Routes>
+      <Route path="/" element={<Login />} />
+    </Routes>
+
   )
 }
 

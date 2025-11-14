@@ -1,1 +1,9 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@theme {
+  --color-link: #f7f5f8;
+  --color-dark: #191022;
+  --color-button: #7f0df2;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
