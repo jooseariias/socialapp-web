@@ -3,8 +3,30 @@ import { motion } from 'motion/react'
 import { AiFillGoogleCircle } from 'react-icons/ai'
 
 export default function GoogleButton() {
+  const BACK_URL = import.meta.env.VITE_BACK_URL
+
   const login = useGoogleLogin({
+    scope:
+      'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
     onSuccess: tokenResponse => {
+      const postGoogleToken = async () => {
+        try {
+          const res = await fetch(`${BACK_URL}/api/LoginGoogle`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token: tokenResponse.access_token }),
+          })
+
+          const data = await res.json()
+          console.log('Respuesta backend:', data)
+        } catch (error) {
+          console.error('Error posting Google token:', error)
+        }
+      }
+      postGoogleToken()
+
       console.log('Login Success:', tokenResponse.access_token)
     },
     onError: () => {
