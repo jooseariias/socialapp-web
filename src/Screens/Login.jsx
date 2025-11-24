@@ -1,9 +1,9 @@
-import { AiFillGoogleCircle } from 'react-icons/ai'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md'
 import { MdEmail, MdLock } from 'react-icons/md'
 import { motion } from 'motion/react'
+import Google from '../Utils/Auth'
 
 export default function Login() {
   const {
@@ -175,14 +175,9 @@ export default function Login() {
             <span className="text-sm font-medium text-gray-500">OR</span>
             <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
           </motion.div>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex h-14 w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-white/10"
-          >
-            <AiFillGoogleCircle className="text-button size-8" />
-            <span>Continue with Google</span>
-          </motion.button>
+
+          <Google />
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
