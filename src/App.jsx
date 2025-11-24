@@ -4,16 +4,57 @@ import Register from '@/Screens/Register.jsx'
 import ForgotPassword from '@/Screens/Password/ForgotPassword.jsx'
 import ResetPassword from './Screens/Password/ResetPassword'
 import { GoogleOAuthProvider } from '@react-oauth/google'
+import { useEffect } from 'react'
+import { useUserStore } from './Store/useUserStore'
+import ProtectedRoute from './Routes/ProtectedRoute'
+import RedirectIfAuth from './Routes/RedirectIfAuth'
 
 function App() {
   const ClientIdGoogle = import.meta.env.VITE_Client_ID
+  const fetchUser = useUserStore(state => state.fetchUser)
+
+  useEffect(() => {
+    fetchUser()
+  }, [fetchUser])
+
   return (
     <GoogleOAuthProvider clientId={ClientIdGoogle}>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/Register" element={<Register />} />
-        <Route path="/ForgotPassword" element={<ForgotPassword />} />
-        <Route path="/ResetPassword" element={<ResetPassword />} />
+        {/* rutas públicas que NO deben verse si ya está logueado */}
+        <Route
+          path="/"
+          element={
+            <RedirectIfAuth>
+              <Login />
+            </RedirectIfAuth>
+          }
+        />
+        <Route
+          path="/Register"
+          element={
+            <RedirectIfAuth>
+              <Register />
+            </RedirectIfAuth>
+          }
+        />
+        <Route
+          path="/ForgotPassword"
+          element={
+            <RedirectIfAuth>
+              <ForgotPassword />
+            </RedirectIfAuth>
+          }
+        />
+
+        {/* rutas protegidas */}
+        <Route
+          path="/ResetPassword"
+          element={
+            <ProtectedRoute>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </GoogleOAuthProvider>
   )
