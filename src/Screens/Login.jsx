@@ -4,6 +4,8 @@ import { MdVisibility, MdVisibilityOff } from 'react-icons/md'
 import { MdEmail, MdLock } from 'react-icons/md'
 import { motion } from 'motion/react'
 import Google from '../Utils/Auth'
+import login from '../Services/login'
+import { useNavigate } from 'react-router-dom'
 
 export default function Login() {
   const {
@@ -12,17 +14,33 @@ export default function Login() {
     formState: { errors },
     trigger,
   } = useForm()
-
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [backendMessage, setBackendMessage] = useState(null)
+  const [backendError, setBackendError] = useState(null)
+  const navigate = useNavigate()
 
   const onSubmit = async data => {
     setLoading(true)
-    console.log(data)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setLoading(false)
-  }
+    setBackendMessage(null)
+    setBackendError(null)
 
+    try {
+      const result = await login(data.email, data.password)
+      setLoading(false)
+
+      if (result.status === 200) {
+        setBackendMessage(result.message)
+        setTimeout(() => navigate('/Feed'), 2000)
+      } else {
+        setBackendError(result.message || result.error || 'Error desconocido')
+      }
+    } catch (error) {
+      console.error(error)
+      setLoading(false)
+      setBackendError('error al loguear el usuario. intenta nuevamente.')
+    }
+  }
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -63,28 +81,26 @@ export default function Login() {
               NEVRYA
             </motion.h1>
           </div>
-          <motion.form
-            onSubmit={handleSubmit(onSubmit)}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-            className="w-full space-y-4"
-          >
-            <h2 className="text-[22px] font-bold text-white">Log In</h2>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45, duration: 0.4 }}
-              className="flex flex-col"
-            >
-              <label className="pb-2 text-white">Email</label>
+          {backendMessage && (
+            <div className="bg-button mb-4 w-full rounded-lg p-3 text-center text-white">
+              {backendMessage}
+            </div>
+          )}
+          {backendError && (
+            <div className="mb-4 w-full rounded-lg bg-red-600/80 p-3 text-center text-white">
+              {backendError}
+            </div>
+          )}
 
+          <motion.form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
+            {/* Email */}
+            <div className="flex flex-col">
+              <label className="pb-2 text-white">Email</label>
               <div className="relative">
                 <MdEmail
                   className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-600"
                   size={22}
                 />
-
                 <input
                   type="email"
                   {...register('email', {
@@ -93,30 +109,22 @@ export default function Login() {
                   })}
                   onKeyUp={() => trigger('email')}
                   placeholder="Enter your email"
-                  className={`form-input h-14 w-full rounded-lg border bg-white/50 pr-4 pl-12 focus:ring-2 dark:border-gray-700 ${
+                  className={`h-14 w-full rounded-lg border bg-white/50 pr-4 pl-12 ${
                     errors.email ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
               </div>
+              {errors.email && <p className="mt-1 text-sm text-red-300">{errors.email.message}</p>}
+            </div>
 
-              {errors.email && (
-                <p className="mt-1 text-sm font-medium text-red-300">{errors.email.message}</p>
-              )}
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55, duration: 0.4 }}
-              className="flex flex-col"
-            >
+            {/* Password */}
+            <div className="flex flex-col">
               <label className="pb-2 text-white">Password</label>
-
               <div className="relative">
                 <MdLock
                   className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-600"
                   size={22}
                 />
-
                 <input
                   type={showPassword ? 'text' : 'password'}
                   {...register('password', {
@@ -125,31 +133,21 @@ export default function Login() {
                   })}
                   onKeyUp={() => trigger('password')}
                   placeholder="Enter your password"
-                  className={`form-input h-14 w-full rounded-lg border bg-white/50 pr-12 pl-12 focus:ring-2 dark:border-gray-700 dark:bg-white/5 ${
+                  className={`h-14 w-full rounded-lg border bg-white/50 pr-12 pl-12 ${
                     errors.password ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
-
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center justify-center pr-4 text-gray-500 dark:text-gray-400"
+                  className="absolute inset-y-0 right-0 flex items-center justify-center pr-4 text-gray-500"
                 >
                   {showPassword ? <MdVisibilityOff size={24} /> : <MdVisibility size={24} />}
                 </button>
               </div>
-
               {errors.password && (
-                <p className="mt-1 text-sm font-medium text-red-300">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-red-300">{errors.password.message}</p>
               )}
-            </motion.div>
-            <div className="text-right">
-              <motion.p
-                whileHover={{ x: 4, opacity: 0.8 }}
-                className="text-button cursor-pointer text-sm font-medium underline-offset-4"
-              >
-                Forgot Password?
-              </motion.p>
             </div>
             <motion.button
               whileHover={{ scale: 1.02 }}
