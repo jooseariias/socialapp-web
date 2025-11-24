@@ -1,12 +1,13 @@
 {
-  "singleQuote": true,
-  "semi": false,
-  "useTabs": false,
-  "printWidth": 10,
-  "bracketSpacing": true,
-  "proseWrap": "never",
-  "arrowParens": "avoid",
-  "endOfLine": "lf",
-  "htmlWhitespaceSensitivity": "ignore",
-  "plugins": ["prettier-plugin-tailwindcss"]
+ "singleQuote": true,
+ "semi": false,
+ "useTabs": false,
+ "tabWidth": 2,
+ "printWidth": 100,
+ "bracketSpacing": true,
+ "proseWrap": "never",
+ "arrowParens": "avoid",
+ "endOfLine": "lf",
+ "htmlWhitespaceSensitivity": "ignore",
+ "plugins": ["prettier-plugin-tailwindcss"]
 }

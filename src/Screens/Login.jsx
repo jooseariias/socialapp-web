@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md'
 import { MdEmail, MdLock } from 'react-icons/md'
+import { motion } from 'motion/react'
 
 export default function Login() {
   const {
@@ -19,13 +20,22 @@ export default function Login() {
     setLoading(true)
     console.log(data)
     await new Promise(resolve => setTimeout(resolve, 1500))
-
     setLoading(false)
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-[#2b0a3d]">
-      <div className="hidden w-1/2 flex-col justify-center pr-10 pl-14 text-white md:flex">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+      className="flex min-h-screen w-full bg-[#2b0a3d]"
+    >
+      <motion.div
+        initial={{ opacity: 0, x: -30 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="hidden w-1/2 flex-col justify-center pr-10 pl-14 text-white md:flex"
+      >
         <h1 className="text-5xl font-extrabold tracking-tight drop-shadow-lg">NEVRYA</h1>
 
         <p className="mt-6 max-w-md text-xl text-white/80">
@@ -34,20 +44,39 @@ export default function Login() {
         </p>
 
         <div className="absolute top-1/2 left-0 h-82 w-82 rounded-full bg-fuchsia-500/30 blur-[100px]"></div>
-      </div>
+      </motion.div>
 
       <div className="flex flex-1 flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.25 }}
+          className="w-full max-w-md"
+        >
           <div className="mb-8 text-center md:hidden">
-            <h1 className="tracking-light text-[32px] leading-tight font-bold text-white">
+            <motion.h1
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="tracking-light text-[32px] leading-tight font-bold text-white"
+            >
               NEVRYA
-            </h1>
+            </motion.h1>
           </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
+          <motion.form
+            onSubmit={handleSubmit(onSubmit)}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            className="w-full space-y-4"
+          >
             <h2 className="text-[22px] font-bold text-white">Log In</h2>
-
-            <div className="flex flex-col">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.4 }}
+              className="flex flex-col"
+            >
               <label className="pb-2 text-white">Email</label>
 
               <div className="relative">
@@ -60,10 +89,7 @@ export default function Login() {
                   type="email"
                   {...register('email', {
                     required: 'Email is required',
-                    pattern: {
-                      value: /\S+@\S+\.\S+/,
-                      message: 'Invalid email address',
-                    },
+                    pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email address' },
                   })}
                   onKeyUp={() => trigger('email')}
                   placeholder="Enter your email"
@@ -76,9 +102,13 @@ export default function Login() {
               {errors.email && (
                 <p className="mt-1 text-sm font-medium text-red-300">{errors.email.message}</p>
               )}
-            </div>
-
-            <div className="flex flex-col">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, duration: 0.4 }}
+              className="flex flex-col"
+            >
               <label className="pb-2 text-white">Password</label>
 
               <div className="relative">
@@ -112,39 +142,53 @@ export default function Login() {
               {errors.password && (
                 <p className="mt-1 text-sm font-medium text-red-300">{errors.password.message}</p>
               )}
-            </div>
-
+            </motion.div>
             <div className="text-right">
-              <p className="text-button cursor-pointer text-sm font-medium transition-all hover:translate-x-1 hover:underline hover:underline-offset-4 hover:opacity-80">
+              <motion.p
+                whileHover={{ x: 4, opacity: 0.8 }}
+                className="text-button cursor-pointer text-sm font-medium underline-offset-4"
+              >
                 Forgot Password?
-              </p>
+              </motion.p>
             </div>
-
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="bg-button focus:ring-primary/50 hover:bg-primary/90 flex h-14 w-full items-center justify-center rounded-lg font-bold text-white transition-colors focus:ring-2 disabled:opacity-60"
+              className="bg-button flex h-14 w-full items-center justify-center rounded-lg font-bold text-white transition disabled:opacity-60"
             >
               {loading ? (
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
               ) : (
                 'Log In'
               )}
-            </button>
-          </form>
-
-          <div className="my-6 flex items-center gap-4">
+            </motion.button>
+          </motion.form>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="my-6 flex items-center gap-4"
+          >
             <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
             <span className="text-sm font-medium text-gray-500">OR</span>
             <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
-          </div>
-
-          <button className="flex h-14 w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-white/10">
+          </motion.div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="flex h-14 w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-white/10"
+          >
             <AiFillGoogleCircle className="text-button size-8" />
             <span>Continue with Google</span>
-          </button>
-
-          <div className="mt-8 text-center">
+          </motion.button>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="mt-8 text-center"
+          >
             <p className="text-gray-600 dark:text-gray-400">
               Don’t have an account?{' '}
               <a
@@ -154,9 +198,9 @@ export default function Login() {
                 Sign Up
               </a>
             </p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   )
 }
