@@ -1,8 +1,17 @@
 import { AiFillGoogleCircle } from 'react-icons/ai'
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
-import { MdVisibilityOff, MdVisibility, MdPerson, MdEmail, MdLock } from 'react-icons/md'
-import { MdMale, MdFemale, MdTransgender } from 'react-icons/md'
+import {
+  MdVisibilityOff,
+  MdVisibility,
+  MdPerson,
+  MdEmail,
+  MdLock,
+  MdMale,
+  MdFemale,
+  MdTransgender,
+  MdArrowBack,
+} from 'react-icons/md'
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false)
@@ -39,6 +48,14 @@ export default function Register() {
   return (
     <div className="relative flex min-h-screen w-full bg-[#2b0a3d]">
       <div className="relative hidden w-1/2 flex-col justify-center pr-10 pl-14 text-white md:flex">
+        <button
+          onClick={() => window.history.back()}
+          className="absolute top-8 left-14 z-10 flex items-center gap-2 font-medium text-white/70 transition hover:cursor-pointer hover:text-white"
+        >
+          <MdArrowBack size={22} />
+          Back
+        </button>
+
         <h1 className="text-5xl font-extrabold tracking-tight drop-shadow-lg">NEVRYA</h1>
 
         <p className="mt-6 max-w-md text-xl text-white/80">
@@ -46,9 +63,10 @@ export default function Register() {
           importantes se conectan, crecen y construyen estatus.
         </p>
 
-        <div className="absolute top-1/2 left-10 h-72 w-72 rounded-full bg-fuchsia-500/30 blur-[140px]"></div>
+        <div className="absolute top-1/2 left-10 h-72 w-72 rounded-full bg-fuchsia-500/30 blur-[140px]" />
       </div>
-      <div className="flex flex-1 flex-col items-center justify-center px-4 md:px-10">
+
+      <div className="relative flex flex-1 flex-col items-center justify-center px-4 md:px-10">
         <h1 className="mt-10 mb-6 text-center text-3xl font-semibold text-white">
           Create an account
         </h1>
@@ -72,9 +90,9 @@ export default function Register() {
                 )}
               />
             </div>
-
             {errors.username && <p className="text-sm text-red-200">{errors.username.message}</p>}
           </div>
+
           <div>
             <label className="mb-1 block font-medium">Email</label>
             <div className="relative">
@@ -97,12 +115,11 @@ export default function Register() {
                 )}
               />
             </div>
-
             {errors.email && <p className="text-sm text-red-200">{errors.email.message}</p>}
           </div>
+
           <div>
             <label className="mb-1 block font-medium">Password</label>
-
             <div className="relative">
               <MdLock className="absolute top-3 left-3 text-white/70" size={22} />
 
@@ -128,7 +145,6 @@ export default function Register() {
                 {showPassword ? <MdVisibilityOff size={24} /> : <MdVisibility size={24} />}
               </button>
             </div>
-
             {errors.password && <p className="text-sm text-red-200">{errors.password.message}</p>}
           </div>
 
@@ -141,7 +157,7 @@ export default function Register() {
               rules={{ required: 'Gender is required' }}
               render={({ field }) => (
                 <>
-                  <div className="mt-1 flex cursor-pointer justify-center gap-3">
+                  <div className="mt-1 flex justify-center gap-3">
                     {[
                       { label: 'Male', icon: <MdMale size={22} /> },
                       { label: 'Female', icon: <MdFemale size={22} /> },
@@ -157,7 +173,7 @@ export default function Register() {
                         className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition ${
                           field.value === option.label
                             ? 'bg-button border-white font-bold text-white'
-                            : 'hover: border-white/40 font-semibold text-white hover:cursor-pointer hover:border-white'
+                            : 'border-white/40 font-semibold text-white hover:border-white'
                         }`}
                       >
                         {option.icon}
@@ -173,6 +189,7 @@ export default function Register() {
               )}
             />
           </div>
+
           <div className="flex flex-col items-center text-center">
             <div className="flex items-center gap-3">
               <Controller
@@ -203,17 +220,18 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-button hover:bg-button/50 w-full cursor-pointer rounded-lg py-2 font-semibold transition disabled:opacity-60"
+            className="bg-button hover:bg-button/50 w-full rounded-lg py-2 font-semibold transition disabled:opacity-60"
           >
             {loading ? 'CREATING USER...' : 'Create Account'}
           </button>
         </form>
 
         <div className="my-6 flex w-full max-w-md items-center gap-3">
-          <div className="h-px flex-1 bg-white/40"></div>
+          <div className="h-px flex-1 bg-white/40" />
           <span className="text-white/70">or</span>
-          <div className="h-px flex-1 bg-white/40"></div>
+          <div className="h-px flex-1 bg-white/40" />
         </div>
+
         <Controller
           control={control}
           name="acceptTerms"
@@ -244,6 +262,14 @@ export default function Register() {
           Already have an account?{' '}
           <span className="text-button cursor-pointer font-bold underline">Log In</span>
         </p>
+
+        <button
+          onClick={() => window.history.back()}
+          className="absolute bottom-6 left-6 flex items-center gap-2 text-white/70 transition hover:text-white md:hidden"
+        >
+          <MdArrowBack size={22} />
+          Back
+        </button>
       </div>
     </div>
   )
