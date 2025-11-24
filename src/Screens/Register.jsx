@@ -1,4 +1,3 @@
-import { AiFillGoogleCircle } from 'react-icons/ai'
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import {
@@ -13,10 +12,15 @@ import {
   MdArrowBack,
 } from 'react-icons/md'
 import { motion } from 'motion/react'
+import { postRegister } from '../Services/Register'
+import { useNavigate } from 'react-router-dom'
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [backendMessage, setBackendMessage] = useState(null)
+  const [backendError, setBackendError] = useState(null)
+  const navigate = useNavigate()
 
   const fieldAnim = {
     hidden: { opacity: 0, y: 10 },
@@ -39,16 +43,26 @@ export default function Register() {
   })
 
   const onSubmit = async data => {
-    if (!data.acceptTerms) {
-      trigger('acceptTerms')
-      return
-    }
-
     setLoading(true)
-    setTimeout(() => {
+    setBackendMessage(null)
+    setBackendError(null)
+
+    try {
+      const result = await postRegister(data)
       setLoading(false)
-      alert('Cuenta creada')
-    }, 1200)
+      if (result.status === 201) {
+        setBackendMessage(result.message)
+        setTimeout(() => {
+          setBackendMessage(null) / navigate('/')
+        }, 3000)
+      } else if (result.message || result.error) {
+        setBackendError(result.message || result.error)
+      }
+    } catch (e) {
+      console.log(e)
+      setLoading(false)
+      setBackendError('Error creating account')
+    }
   }
 
   return (
@@ -59,6 +73,16 @@ export default function Register() {
       className="relative flex min-h-screen w-full bg-[#2b0a3d]"
     >
       <div className="relative hidden w-1/2 flex-col justify-center pr-10 pl-14 text-white md:flex">
+        {backendMessage && (
+          <div className="bg-button mb-4 w-full max-w-md rounded-lg p-3 text-center text-white">
+            {backendMessage}
+          </div>
+        )}
+        {backendError && (
+          <div className="mb-4 w-full max-w-md rounded-lg bg-red-600/80 p-3 text-center text-white">
+            {backendError}
+          </div>
+        )}
         <motion.button
           whileHover={{ x: -4, opacity: 1 }}
           className="absolute top-8 left-14 z-10 flex items-center gap-2 font-medium text-white/70 transition hover:cursor-pointer hover:text-white"
@@ -113,6 +137,17 @@ export default function Register() {
           }}
           className="w-full max-w-md space-y-4 text-white"
         >
+          {backendMessage && (
+            <div className="bg-button mb-4 block w-full max-w-md rounded-lg p-3 text-center text-white md:hidden">
+              {backendMessage}
+            </div>
+          )}
+          {backendError && (
+            <div className="mb-4 block w-full max-w-md rounded-lg bg-red-600/80 p-3 text-center text-white md:hidden">
+              {backendError}
+            </div>
+          )}
+
           <motion.div variants={fieldAnim}>
             <label className="mb-1 block font-medium">Username</label>
             <div className="relative">
@@ -265,23 +300,10 @@ export default function Register() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="w/full my-6 flex max-w-md items-center gap-3"
-        >
-          <div className="h-px flex-1 bg-white/40" />
-          <span className="text-white/70">or</span>
-          <div className="h-px flex-1 bg-white/40" />
-        </motion.div>
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          className="flex w-full max-w-md items-center justify-center gap-3 rounded-lg border border-white/40 bg-white py-2 font-semibold text-black transition"
-          onClick={() => alert('Google login...')}
-        >
-          <AiFillGoogleCircle className="text-button size-6" />
-          Continue with Google
-        </motion.button>
+          className="w/full flex max-w-md items-center gap-3"
+        ></motion.div>
 
-        <p className="mt-6 text-center text-sm text-white/80">
+        <p className="mt-5 text-center text-sm text-white/80">
           By signing up, you agree to our <span className="cursor-pointer underline">Terms</span>{' '}
           and <span className="cursor-pointer underline">Privacy Policy</span>.
         </p>
