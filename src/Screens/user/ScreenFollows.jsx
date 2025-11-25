@@ -1,16 +1,16 @@
-import { AiFillEdit } from 'react-icons/ai'
 import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   FaRegHeart,
   FaRegImage,
+  FaUserEdit,
   FaUserFriends,
   FaSave,
   FaTimes,
   FaCloudUploadAlt,
   FaImage,
 } from 'react-icons/fa'
-import { IoLocationOutline } from 'react-icons/io5'
+import { IoLocationOutline, IoChatbubbleEllipses } from 'react-icons/io5'
 import { useUserStore } from '../../Store/useUserStore'
 import Header from '../../Components/Header'
 
@@ -19,6 +19,7 @@ const ProfileUser = () => {
   const [activeTab, setActiveTab] = useState('Posts')
   const [editing, setEditing] = useState(null)
   const [formData, setFormData] = useState({
+    name: '',
     description: '',
     location: '',
     image: null,
@@ -56,12 +57,13 @@ const ProfileUser = () => {
   const statIcons = {
     posts: <FaRegImage />,
     followers: <FaUserFriends />,
-    following: <FaUserFriends />,
+    following: <FaUserEdit />,
   }
 
   const startEditing = field => {
     setEditing(field)
     setFormData({
+      name: user?.name || '',
       description: user?.description || '',
       location: user?.location || '',
       image: null,
@@ -72,6 +74,7 @@ const ProfileUser = () => {
   const cancelEditing = () => {
     setEditing(null)
     setFormData({
+      name: '',
       description: '',
       location: '',
       image: null,
@@ -82,7 +85,6 @@ const ProfileUser = () => {
 
   const handleInputChange = e => {
     const { name, value } = e.target
-    if (name === 'description' && value.length > 150) return
     setFormData(prev => ({
       ...prev,
       [name]: value,
@@ -122,7 +124,10 @@ const ProfileUser = () => {
       const submitData = new FormData()
       let updatedFields = {}
 
-      if (editing === 'bio') {
+      if (editing === 'name') {
+        submitData.append('name', formData.name)
+        updatedFields = { name: formData.name }
+      } else if (editing === 'bio') {
         submitData.append('description', formData.description)
         updatedFields = { description: formData.description }
       } else if (editing === 'location') {
@@ -165,11 +170,13 @@ const ProfileUser = () => {
         transition={{ duration: 0.6 }}
         className="flex min-h-screen w-full bg-[#2b0a3d]"
       >
+        {/* Fondos decorativos */}
         <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-fuchsia-500/20 blur-[80px]" />
         <div className="absolute right-1/4 bottom-1/4 h-64 w-64 rounded-full bg-purple-500/20 blur-[80px]" />
 
         <div className="relative z-10 mx-auto w-full max-w-2xl px-4">
           <div className="px-4 pb-8">
+            {/* Profile Header */}
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -190,79 +197,103 @@ const ProfileUser = () => {
                 </motion.div>
                 <button
                   onClick={() => startEditing('image')}
-                  className="bg-button absolute -right-0 -bottom-2 rounded-full p-2 text-white shadow-lg transition-colors hover:scale-105 hover:cursor-pointer hover:bg-purple-600"
+                  className="bg-button absolute -right-2 -bottom-2 rounded-full p-2 text-white shadow-lg transition-colors hover:bg-purple-600"
                 >
-                  <FaCloudUploadAlt size={14} />
+                  <FaUserEdit size={14} />
                 </button>
+                <span className="absolute right-2 bottom-2 h-5 w-5 rounded-full border-2 border-[#2b0a3d] bg-green-500" />
               </div>
 
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-white">{user?.name || profileData.name}</h2>
+                <div className="flex items-center justify-center gap-2">
+                  {editing === 'name' ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className="rounded-lg border border-white/20 bg-white/10 px-3 py-1 text-center text-2xl font-bold text-white focus:border-purple-400 focus:outline-none"
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleSave}
+                        className="text-green-400 transition-colors hover:text-green-300"
+                      >
+                        <FaSave size={16} />
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        className="text-red-400 transition-colors hover:text-red-300"
+                      >
+                        <FaTimes size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold text-white">
+                        {user?.name || profileData.name}
+                      </h2>
+                      <button
+                        onClick={() => startEditing('name')}
+                        className="text-white/60 transition-colors hover:text-purple-300"
+                      >
+                        <FaUserEdit size={16} />
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <p className="mt-1 text-white/60">{profileData.username}</p>
               </div>
             </motion.section>
+
+            {/* Bio */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="px-4 pb-6"
+              className="px-4 pb-6 text-center"
             >
-              <div className="mx-auto w-full max-w-md">
-                <div className="flex w-full items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    {editing === 'bio' ? (
-                      <div className="w-full">
-                        <textarea
-                          name="description"
-                          value={formData.description}
-                          onChange={handleInputChange}
-                          rows="3"
-                          className="w-full resize-none rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white focus:border-purple-400 focus:outline-none"
-                          placeholder="Escribe tu descripción..."
-                          autoFocus
-                          maxLength={150}
-                        />
-                        <div className="mt-2 text-right text-sm text-white/40">
-                          {formData.description.length}/150
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-center leading-relaxed break-words text-white/80">
-                        {user?.description || profileData.bio}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex-shrink-0">
-                    {editing === 'bio' ? (
-                      <div className="flex flex-col gap-2">
-                        <button
-                          onClick={handleSave}
-                          className="flex items-center gap-1 rounded-lg text-white/80 transition-colors hover:scale-105 hover:cursor-pointer"
-                          title="Guardar"
-                        >
-                          <FaSave size={16} />
-                        </button>
-                        <button
-                          onClick={cancelEditing}
-                          className="flex items-center gap-1 rounded-lg text-white/80 transition-colors hover:scale-105 hover:cursor-pointer"
-                          title="Cancelar"
-                        >
-                          <FaTimes size={16} />
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => startEditing('bio')}
-                        className="text-white/60 transition-colors hover:text-purple-300"
-                        title="Editar descripción"
-                      >
-                        <AiFillEdit size={18} />
-                      </button>
-                    )}
+              {editing === 'bio' ? (
+                <div className="flex flex-col items-center gap-2">
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full max-w-md resize-none rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-center text-white focus:border-purple-400 focus:outline-none"
+                    placeholder="Escribe tu descripción..."
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSave}
+                      className="flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1 text-white transition-colors hover:bg-green-700"
+                    >
+                      <FaSave size={12} /> Guardar
+                    </button>
+                    <button
+                      onClick={cancelEditing}
+                      className="flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1 text-white transition-colors hover:bg-red-700"
+                    >
+                      <FaTimes size={12} /> Cancelar
+                    </button>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-lg text-white/80">{user?.description || profileData.bio}</p>
+                  <button
+                    onClick={() => startEditing('bio')}
+                    className="text-white/60 transition-colors hover:text-purple-300"
+                  >
+                    <FaUserEdit size={14} />
+                  </button>
+                </div>
+              )}
             </motion.div>
+
+            {/* Location & Tier */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -270,37 +301,39 @@ const ProfileUser = () => {
               className="flex flex-wrap justify-center gap-3 px-4 pb-6"
             >
               {editing === 'location' ? (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleInputChange}
-                      className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-white focus:border-purple-400 focus:outline-none"
-                      placeholder="Tu ubicación..."
-                      autoFocus
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleSave}
-                      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2 text-white transition-all hover:from-green-600 hover:to-emerald-700"
-                    >
-                      <FaSave size={14} /> Guardar
-                    </button>
-                    <button
-                      onClick={cancelEditing}
-                      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-gray-600 to-gray-700 px-4 py-2 text-white transition-all hover:from-gray-700 hover:to-gray-800"
-                    >
-                      <FaTimes size={14} /> Cancelar
-                    </button>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-white focus:border-purple-400 focus:outline-none"
+                    placeholder="Tu ubicación..."
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleSave}
+                    className="text-green-400 transition-colors hover:text-green-300"
+                  >
+                    <FaSave size={14} />
+                  </button>
+                  <button
+                    onClick={cancelEditing}
+                    className="text-red-400 transition-colors hover:text-red-300"
+                  >
+                    <FaTimes size={14} />
+                  </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 backdrop-blur-sm">
                   <IoLocationOutline className="text-purple-300" />
                   <span className="text-white/90">{user?.location || profileData.location}</span>
+                  <button
+                    onClick={() => startEditing('location')}
+                    className="text-white/60 transition-colors hover:text-purple-300"
+                  >
+                    <FaUserEdit size={12} />
+                  </button>
                 </div>
               )}
 
@@ -322,6 +355,8 @@ const ProfileUser = () => {
                 <span className="text-amber-200">{profileData.tier}</span>
               </div>
             </motion.div>
+
+            {/* Image Upload Modal */}
             {editing === 'image' && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -424,6 +459,31 @@ const ProfileUser = () => {
                 </motion.div>
               </motion.div>
             )}
+
+            {/* Action Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex gap-3 px-4 pb-6"
+            >
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-button flex-1 rounded-lg py-3 font-bold text-white shadow-lg transition-colors hover:bg-purple-600"
+              >
+                Follow
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-white/30 py-3 text-white backdrop-blur-sm transition-colors hover:bg-white/10"
+              >
+                <IoChatbubbleEllipses size={18} /> Message
+              </motion.button>
+            </motion.div>
+
+            {/* Stats */}
             <motion.section
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -444,6 +504,7 @@ const ProfileUser = () => {
               ))}
             </motion.section>
 
+            {/* Tabs */}
             <motion.section
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
