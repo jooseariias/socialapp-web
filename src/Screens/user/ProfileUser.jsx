@@ -50,7 +50,7 @@ const ProfileUser = () => {
       followers: user?.followers?.length || 0,
       following: user?.following?.length || 0,
     },
-    posts: user?.posts || [],
+    posts: user?.postsCount || [],
   }
 
   const statIcons = {

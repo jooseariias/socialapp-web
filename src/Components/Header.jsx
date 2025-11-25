@@ -12,7 +12,6 @@ const Header = () => {
 
   const handlePostCreated = newPost => {
     console.log('Nuevo post creado:', newPost)
-    // Aquí puedes actualizar el feed o hacer cualquier acción necesaria
   }
   const { user, loading } = useUserStore()
 
@@ -40,18 +39,17 @@ const Header = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="rounded-lg p-2 text-white transition-colors hover:bg-white/10"
-          >
-            <FaSearch size={18} />
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             className="flex items-center gap-2 rounded-lg px-4 py-2 text-white transition-colors hover:bg-white/10"
           >
             <FaHome size={18} />
             <span className="hidden sm:block">Inicio</span>
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="rounded-lg p-2 text-white transition-colors hover:bg-white/10"
+          >
+            <FaSearch size={18} />
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
