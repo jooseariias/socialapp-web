@@ -6,7 +6,7 @@ export default function RedirectIfAuth({ children }) {
 
   if (loading) return <p>Cargando...</p>
 
-  if (user) return <Navigate to="/ResetPassword" replace />
+  if (user) return <Navigate to="/ProfileUser" replace />
 
   return children
 }

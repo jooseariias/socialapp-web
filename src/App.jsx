@@ -3,6 +3,8 @@ import Login from '@/Screens/Login.jsx'
 import Register from '@/Screens/Register.jsx'
 import ForgotPassword from '@/Screens/Password/ForgotPassword.jsx'
 import ResetPassword from './Screens/Password/ResetPassword'
+import ProfileUser from './Screens/user/ProfileUser'
+
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { useEffect } from 'react'
 import { useUserStore } from './Store/useUserStore'
@@ -48,10 +50,10 @@ function App() {
 
         {/* rutas protegidas */}
         <Route
-          path="/ResetPassword"
+          path="/ProfileUser"
           element={
             <ProtectedRoute>
-              <ResetPassword />
+              <ProfileUser />
             </ProtectedRoute>
           }
         />
