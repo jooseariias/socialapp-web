@@ -3,12 +3,15 @@ import { motion } from 'framer-motion'
 import { FaImage, FaTimes, FaPaperPlane, FaRegSmile } from 'react-icons/fa'
 import EmojiPicker from 'emoji-picker-react'
 import { useUserStore } from '../Store/useUserStore'
+import createPost from '../Services/postCont'
 
 const CreatePost = ({ isOpen, onClose, onPostCreated }) => {
   const { user } = useUserStore()
 
   const [content, setContent] = useState('')
+
   const [image, setImage] = useState(null)
+
   const [imagePreview, setImagePreview] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -80,29 +83,23 @@ const CreatePost = ({ isOpen, onClose, onPostCreated }) => {
       setLoading(true)
       setError('')
 
-      const formData = new FormData()
-      if (content.trim()) formData.append('content', content)
-      if (image) formData.append('image', image)
+      // Llamada al servicio
+      const result = await createPost(content, image)
 
-      const response = await fetch('http://localhost:8000/api/create-post', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(errorText)
+      if (result.status >= 400) {
+        throw new Error(result.error || 'Error al crear el post')
       }
 
-      const result = await response.json()
-
+      // Limpiar formulario
       setContent('')
       setImage(null)
       setImagePreview(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
 
+      // Notificar al padre del nuevo post
       onPostCreated?.(result.post)
+
+      // Cerrar modal
       onClose()
     } catch (err) {
       setError(err.message || 'Error al crear el post')

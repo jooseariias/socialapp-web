@@ -46,11 +46,11 @@ const ProfileUser = () => {
       user?.image ||
       'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
     stats: {
-      posts: user?.posts?.length || 0,
+      posts: user?.postsCount || 0,
       followers: user?.followers?.length || 0,
       following: user?.following?.length || 0,
     },
-    posts: user?.postsCount || [],
+    posts: user?.posts || [],
   }
 
   const statIcons = {
@@ -477,33 +477,6 @@ const ProfileUser = () => {
             </motion.section>
 
             {/* Grid */}
-            <motion.section
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className="grid grid-cols-3 gap-2"
-            >
-              {profileData.posts.map((post, idx) => (
-                <motion.div
-                  key={idx}
-                  className="group relative aspect-square overflow-hidden rounded-xl border border-white/10"
-                  whileHover={{ scale: 1.03 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                >
-                  <img src={post} alt="" className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                  <motion.div
-                    className="absolute bottom-3 left-3 flex items-center gap-1 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100"
-                    initial={{ y: 10 }}
-                    whileHover={{ y: 0 }}
-                  >
-                    <FaRegHeart className="text-sm" /> {(idx + 1) * 24}
-                  </motion.div>
-                </motion.div>
-              ))}
-            </motion.section>
           </div>
         </div>
       </motion.div>

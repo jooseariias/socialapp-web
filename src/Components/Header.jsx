@@ -10,9 +10,6 @@ const Header = () => {
   const [showSearch, setShowSearch] = useState(false)
   const [showCreatePost, setShowCreatePost] = useState(false)
 
-  const handlePostCreated = newPost => {
-    console.log('Nuevo post creado:', newPost)
-  }
   const { user, loading } = useUserStore()
 
   const notifications = [
@@ -191,11 +188,7 @@ const Header = () => {
         />
       )}
       <section>
-        <CreatePost
-          isOpen={showCreatePost}
-          onClose={() => setShowCreatePost(false)}
-          onPostCreated={handlePostCreated}
-        />
+        <CreatePost isOpen={showCreatePost} onClose={() => setShowCreatePost(false)} />
       </section>
     </motion.header>
   )
