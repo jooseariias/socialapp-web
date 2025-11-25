@@ -1,8 +1,101 @@
 import { motion } from 'framer-motion'
-import { FaRegImage, FaRegHeart } from 'react-icons/fa'
-export default function PostAndLIkes({ activeTab, setActiveTab }) {
+import { FaRegImage, FaRegHeart, FaHeart, FaRegComment, FaEllipsisH } from 'react-icons/fa'
+import { IoMdCheckmarkCircle } from 'react-icons/io'
+import getPostUser from '../Services/getPostUser'
+import { useState, useEffect } from 'react'
+
+export default function PostAndLikes({ activeTab, setActiveTab }) {
+  const [postUser, setPostUser] = useState(null)
+  console.log('postUser', postUser)
+  const [likedPosts, setLikedPosts] = useState(new Set())
+  const [comments, setComments] = useState({})
+  const [newComment, setNewComment] = useState('')
+  const [showComments, setShowComments] = useState(null)
+  const [expandedPosts, setExpandedPosts] = useState(new Set())
+
+  useEffect(() => {
+    const getPostUserData = async () => {
+      const result = await getPostUser()
+      console.log('result', result)
+      if (result.status >= 400) {
+        throw new Error(result.error || 'Error al obtener el post')
+      }
+      setPostUser(result.data)
+    }
+    getPostUserData()
+  }, [])
+
+  const handleLike = postId => {
+    setLikedPosts(prev => {
+      const newLiked = new Set(prev)
+      if (newLiked.has(postId)) {
+        newLiked.delete(postId)
+      } else {
+        newLiked.add(postId)
+      }
+      return newLiked
+    })
+  }
+
+  const handleAddComment = postId => {
+    if (!newComment.trim()) return
+
+    setComments(prev => ({
+      ...prev,
+      [postId]: [
+        ...(prev[postId] || []),
+        {
+          id: Date.now(),
+          text: newComment,
+          user: 'Tú',
+          timestamp: new Date().toLocaleTimeString(),
+        },
+      ],
+    }))
+    setNewComment('')
+  }
+
+  const toggleComments = postId => {
+    setShowComments(showComments === postId ? null : postId)
+  }
+
+  const toggleExpand = postId => {
+    setExpandedPosts(prev => {
+      const newExpanded = new Set(prev)
+      if (newExpanded.has(postId)) {
+        newExpanded.delete(postId)
+      } else {
+        newExpanded.add(postId)
+      }
+      return newExpanded
+    })
+  }
+
+  const formatDate = dateString => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+
+  // Función para truncar texto largo
+  const truncateText = (text, postId, maxLength = 150) => {
+    if (expandedPosts.has(postId) || text.length <= maxLength) {
+      return text
+    }
+    return text.slice(0, maxLength) + '...'
+  }
+
+  // Función para verificar si el texto necesita truncamiento
+  const needsTruncation = (text, maxLength = 150) => {
+    return text.length > maxLength
+  }
+
   return (
-    <div>
+    <div className="mx-auto max-w-2xl p-4">
+      {/* Tabs */}
       <motion.section
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -20,7 +113,7 @@ export default function PostAndLIkes({ activeTab, setActiveTab }) {
                 key={tab.name}
                 onClick={() => setActiveTab(tab.name)}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold transition-all ${
-                  isActive ? 'bg-button text-white shadow-md' : 'text-white/60 hover:text-white'
+                  isActive ? 'bg-blue-500 text-white shadow-md' : 'text-white/60 hover:text-white'
                 }`}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
@@ -32,6 +125,159 @@ export default function PostAndLIkes({ activeTab, setActiveTab }) {
           })}
         </div>
       </motion.section>
+
+      {/* Posts */}
+      {activeTab === 'Posts' && postUser && (
+        <div className="space-y-6">
+          {postUser.map(post => (
+            <motion.div
+              key={post._id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="overflow-hidden rounded-2xl border border-white/10 bg-white/10 p-4 shadow-sm backdrop-blur-sm"
+            >
+              {/* Header del post */}
+              <div className="flex items-start justify-between">
+                <div className="flex items-start space-x-3">
+                  <img
+                    src={post.user.image}
+                    alt={post.user.name}
+                    className="h-12 w-12 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-semibold text-white">{post.user.name}</h3>
+                      <IoMdCheckmarkCircle className="text-blue-500" />
+                    </div>
+                    <div className="mt-1 flex items-center space-x-4 text-sm text-white/60">
+                      <span>Follower</span>
+                    </div>
+                  </div>
+                </div>
+                <button className="rounded-full p-2 text-white/40 hover:bg-white/10 hover:text-white/60">
+                  <FaEllipsisH />
+                </button>
+              </div>
+
+              {/* Contenido del post */}
+              <div className="mt-4">
+                <div className="break-words">
+                  <p className="text-white">{truncateText(post.content, post._id)}</p>
+
+                  {/* Botón "Ver más" para textos largos */}
+                  {needsTruncation(post.content) && (
+                    <button
+                      onClick={() => toggleExpand(post._id)}
+                      className="mt-2 text-sm text-blue-400 transition-colors hover:text-blue-300"
+                    >
+                      {expandedPosts.has(post._id) ? 'Ver menos' : 'Ver más'}
+                    </button>
+                  )}
+                </div>
+
+                {/* Imagen del post (si existe) */}
+                {post.image && (
+                  <div className="mt-4 overflow-hidden rounded-xl">
+                    <img
+                      src={post.image}
+                      alt="Post content"
+                      className="h-auto max-h-96 w-full object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Contadores de interacciones */}
+                <div className="mt-4 flex items-center justify-between text-sm text-white/60">
+                  <div className="flex items-center space-x-4">
+                    <span>{likedPosts.has(post._id) ? 1 : 0} likes</span>
+                    <span
+                      className="cursor-pointer transition-colors hover:text-blue-400"
+                      onClick={() => toggleComments(post._id)}
+                    >
+                      View all {comments[post._id]?.length || 0} comments
+                    </span>
+                  </div>
+                  <span className="text-white/40">{formatDate(post.createdAt)}</span>
+                </div>
+
+                {/* Acciones del post */}
+                <div className="mt-3 flex space-x-6 border-t border-white/10 pt-3">
+                  <button
+                    onClick={() => handleLike(post._id)}
+                    className={`flex items-center gap-2 transition-colors ${
+                      likedPosts.has(post._id) ? 'text-red-500' : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    {likedPosts.has(post._id) ? (
+                      <FaHeart className="text-red-500" />
+                    ) : (
+                      <FaRegHeart />
+                    )}
+                    <span>Like</span>
+                  </button>
+
+                  <button
+                    onClick={() => toggleComments(post._id)}
+                    className="flex items-center gap-2 text-white/60 transition-colors hover:text-white"
+                  >
+                    <FaRegComment />
+                    <span>Comment</span>
+                  </button>
+                </div>
+
+                {/* Sección de comentarios */}
+                {showComments === post._id && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="mt-4 border-t border-white/10 pt-4"
+                  >
+                    {/* Lista de comentarios */}
+                    {comments[post._id]?.map(comment => (
+                      <div key={comment.id} className="mb-3 flex items-start space-x-3">
+                        <div className="flex-1">
+                          <div className="mb-1 flex items-center space-x-2">
+                            <span className="text-sm font-semibold text-white">{comment.user}</span>
+                            <span className="text-xs text-white/40">{comment.timestamp}</span>
+                          </div>
+                          <p className="text-sm text-white/80">{comment.text}</p>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Input para nuevo comentario */}
+                    <div className="mt-3 flex gap-2">
+                      <input
+                        type="text"
+                        value={newComment}
+                        onChange={e => setNewComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        className="flex-1 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                        onKeyPress={e => e.key === 'Enter' && handleAddComment(post._id)}
+                      />
+                      <button
+                        onClick={() => handleAddComment(post._id)}
+                        className="rounded-lg bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600"
+                      >
+                        Post
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* Vista de Likes */}
+      {activeTab === 'Likes' && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-12 text-center">
+          <FaRegHeart className="mx-auto mb-4 text-4xl text-white/40" />
+          <h3 className="mb-2 text-xl font-semibold text-white">Posts que te gustan</h3>
+          <p className="text-white/60">Los posts que des like aparecerán aquí</p>
+        </motion.div>
+      )}
     </div>
   )
 }
