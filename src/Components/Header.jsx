@@ -2,11 +2,18 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaSearch, FaBell, FaPlus, FaHome, FaUser, FaCog } from 'react-icons/fa'
 import { useUserStore } from '../Store/useUserStore'
+import CreatePost from './CreatePost'
 
 const Header = () => {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
+  const [showCreatePost, setShowCreatePost] = useState(false)
+
+  const handlePostCreated = newPost => {
+    console.log('Nuevo post creado:', newPost)
+    // Aquí puedes actualizar el feed o hacer cualquier acción necesaria
+  }
   const { user, loading } = useUserStore()
 
   const notifications = [
@@ -49,6 +56,7 @@ const Header = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => setShowCreatePost(true)}
             className="bg-button flex items-center gap-2 rounded-lg px-4 py-2 text-white transition-colors hover:bg-purple-600"
           >
             <FaPlus size={16} />
@@ -184,6 +192,13 @@ const Header = () => {
           }}
         />
       )}
+      <section>
+        <CreatePost
+          isOpen={showCreatePost}
+          onClose={() => setShowCreatePost(false)}
+          onPostCreated={handlePostCreated}
+        />
+      </section>
     </motion.header>
   )
 }
