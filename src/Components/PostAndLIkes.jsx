@@ -1,17 +1,31 @@
 import { motion } from 'framer-motion'
-import { FaRegImage, FaRegHeart, FaHeart, FaRegComment, FaEllipsisH } from 'react-icons/fa'
+import { FaRegImage, FaRegHeart, FaHeart, FaRegComment, FaEllipsisH, FaTrash } from 'react-icons/fa'
 import { IoMdCheckmarkCircle } from 'react-icons/io'
 import getPostUser from '../Services/getPostUser'
 import { useState, useEffect } from 'react'
+import postLike from '../Services/post/postLike'
+import postUnLike from '../Services/post/postUnLike'
+import postCreateComment from '../Services/post/costCreateComment'
+import postDeleteComment from '../Services/post/deleteComment'
+import { useUserStore } from '../Store/useUserStore'
 
 export default function PostAndLikes({ activeTab, setActiveTab }) {
   const [postUser, setPostUser] = useState(null)
-  console.log('postUser', postUser)
   const [likedPosts, setLikedPosts] = useState(new Set())
   const [comments, setComments] = useState({})
   const [newComment, setNewComment] = useState('')
   const [showComments, setShowComments] = useState(null)
   const [expandedPosts, setExpandedPosts] = useState(new Set())
+  const [loading, setLoading] = useState({})
+  const [deleteModal, setDeleteModal] = useState({
+    show: false,
+    postId: null,
+    commentId: null,
+    commentText: '',
+  })
+  const { user } = useUserStore()
+
+  const currentUserId = user?.id
 
   useEffect(() => {
     const getPostUserData = async () => {
@@ -21,38 +35,164 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
         throw new Error(result.error || 'Error al obtener el post')
       }
       setPostUser(result.data)
+
+      // Inicializar likedPosts con los posts que ya tienen likes
+      const initialLikedPosts = new Set()
+      result.data.forEach(post => {
+        if (post.likes && post.likes.length > 0) {
+          initialLikedPosts.add(post._id)
+        }
+      })
+      setLikedPosts(initialLikedPosts)
+
+      // Inicializar comentarios existentes del API
+      const initialComments = {}
+      result.data.forEach(post => {
+        if (post.comments && post.comments.length > 0) {
+          // Mapear los comentarios del API al formato que espera el componente
+          initialComments[post._id] = post.comments.map(comment => ({
+            _id: comment._id,
+            text: comment.text,
+            user: comment.user.name, // Usar el nombre del usuario
+            userId: comment.user._id, // Guardar el ID del usuario que creó el comentario
+            createdAt: comment.createdAt,
+            timestamp: new Date(comment.createdAt).toLocaleTimeString(),
+          }))
+        }
+      })
+      setComments(initialComments)
     }
     getPostUserData()
   }, [])
 
-  const handleLike = postId => {
+  const handleLike = async postId => {
+    const wasLiked = likedPosts.has(postId)
     setLikedPosts(prev => {
       const newLiked = new Set(prev)
-      if (newLiked.has(postId)) {
+      if (wasLiked) {
         newLiked.delete(postId)
       } else {
         newLiked.add(postId)
       }
       return newLiked
     })
+
+    try {
+      setLoading(prev => ({ ...prev, [postId]: true }))
+      if (wasLiked) {
+        await postUnLike(postId)
+      } else {
+        await postLike(postId)
+      }
+    } catch (error) {
+      console.error('Error al dar like:', error)
+      // Revertir en caso de error
+      setLikedPosts(prev => {
+        const newLiked = new Set(prev)
+        if (wasLiked) {
+          newLiked.add(postId)
+        } else {
+          newLiked.delete(postId)
+        }
+        return newLiked
+      })
+    } finally {
+      setLoading(prev => ({ ...prev, [postId]: false }))
+    }
   }
 
-  const handleAddComment = postId => {
+  const handleAddComment = async postId => {
     if (!newComment.trim()) return
 
+    const tempComment = {
+      id: Date.now(),
+      text: newComment,
+      user: 'Tú',
+      userId: currentUserId, // Asignar el ID del usuario actual
+      timestamp: new Date().toLocaleTimeString(),
+      _id: `temp-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    }
+
+    // Agregar comentario temporalmente
     setComments(prev => ({
       ...prev,
-      [postId]: [
-        ...(prev[postId] || []),
-        {
-          id: Date.now(),
-          text: newComment,
-          user: 'Tú',
-          timestamp: new Date().toLocaleTimeString(),
-        },
-      ],
+      [postId]: [...(prev[postId] || []), tempComment],
     }))
+
+    const commentText = newComment
     setNewComment('')
+
+    try {
+      setLoading(prev => ({ ...prev, [`comment-${postId}`]: true }))
+      const result = await postCreateComment(postId, commentText)
+
+      if (result.status >= 400) {
+        throw new Error(result.error || 'Error al comentar')
+      }
+
+      // Si la API devuelve el comentario creado, actualizamos con los datos reales
+      if (result.data) {
+        setComments(prev => ({
+          ...prev,
+          [postId]: (prev[postId] || []).map(comment =>
+            comment.id === tempComment.id
+              ? {
+                  _id: result.data._id,
+                  text: result.data.text,
+                  user: result.data.user?.name || 'Tú',
+                  userId: result.data.user?._id || currentUserId,
+                  createdAt: result.data.createdAt,
+                  timestamp: new Date(result.data.createdAt).toLocaleTimeString(),
+                }
+              : comment,
+          ),
+        }))
+      }
+    } catch (error) {
+      console.error('Error al agregar comentario:', error)
+      // Remover comentario temporal en caso de error
+      setComments(prev => ({
+        ...prev,
+        [postId]: (prev[postId] || []).filter(comment => comment.id !== tempComment.id),
+      }))
+    } finally {
+      setLoading(prev => ({ ...prev, [`comment-${postId}`]: false }))
+    }
+  }
+
+  const openDeleteModal = (postId, commentId, commentText) => {
+    setDeleteModal({
+      show: true,
+      postId,
+      commentId,
+      commentText,
+    })
+  }
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ show: false, postId: null, commentId: null, commentText: '' })
+  }
+
+  const handleDeleteComment = async () => {
+    const { postId, commentId } = deleteModal
+
+    try {
+      setLoading(prev => ({ ...prev, [`delete-${commentId}`]: true }))
+      await postDeleteComment(postId, commentId)
+
+      // Remover comentario del estado local
+      setComments(prev => ({
+        ...prev,
+        [postId]: (prev[postId] || []).filter(comment => comment._id !== commentId),
+      }))
+
+      closeDeleteModal()
+    } catch (error) {
+      console.error('Error al eliminar comentario:', error)
+    } finally {
+      setLoading(prev => ({ ...prev, [`delete-${commentId}`]: false }))
+    }
   }
 
   const toggleComments = postId => {
@@ -93,8 +233,62 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
     return text.length > maxLength
   }
 
+  // Contar likes reales (del API + estado local)
+  const getLikeCount = post => {
+    const baseLikes = post.likes?.length || 0
+    const localLike = likedPosts.has(post._id) ? 1 : 0
+    // Si el post ya estaba liked, no sumamos duplicado
+    const wasAlreadyLiked = post.likes && post.likes.length > 0
+    return wasAlreadyLiked ? Math.max(baseLikes, localLike) : baseLikes + localLike
+  }
+
+  // Verificar si el usuario puede borrar el comentario (dueño del comentario o del post)
+  const canDeleteComment = (comment, post) => {
+    // El usuario puede borrar si:
+    // 1. Es el dueño del comentario (comment.userId === currentUserId)
+    // 2. O es el dueño del post (post.user._id === currentUserId)
+    return comment.userId === currentUserId || post.user._id === currentUserId
+  }
+
   return (
     <div className="mx-auto max-w-2xl p-4">
+      {/* Modal de confirmación para borrar comentario */}
+      {deleteModal.show && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-white/10 p-6 shadow-xl backdrop-blur-sm"
+          >
+            <h3 className="mb-4 text-xl font-semibold text-white">Eliminar comentario</h3>
+            <p className="mb-6 text-white/80">
+              ¿Estás seguro de que quieres eliminar este comentario?
+              <br />
+              <span className="mt-2 block text-sm text-white/60">"{deleteModal.commentText}"</span>
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={closeDeleteModal}
+                className="rounded-lg bg-white/10 px-4 py-2 text-white/80 transition-colors hover:bg-white/20"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteComment}
+                disabled={loading[`delete-${deleteModal.commentId}`]}
+                className="rounded-lg bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading[`delete-${deleteModal.commentId}`] ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
       {/* Tabs */}
       <motion.section
         initial={{ opacity: 0, y: 10 }}
@@ -189,7 +383,7 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
                 {/* Contadores de interacciones */}
                 <div className="mt-4 flex items-center justify-between text-sm text-white/60">
                   <div className="flex items-center space-x-4">
-                    <span>{likedPosts.has(post._id) ? 1 : 0} likes</span>
+                    <span>{getLikeCount(post)} likes</span>
                     <span
                       className="cursor-pointer transition-colors hover:text-blue-400"
                       onClick={() => toggleComments(post._id)}
@@ -204,16 +398,17 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
                 <div className="mt-3 flex space-x-6 border-t border-white/10 pt-3">
                   <button
                     onClick={() => handleLike(post._id)}
+                    disabled={loading[post._id]}
                     className={`flex items-center gap-2 transition-colors ${
                       likedPosts.has(post._id) ? 'text-red-500' : 'text-white/60 hover:text-white'
-                    }`}
+                    } ${loading[post._id] ? 'cursor-not-allowed opacity-50' : ''}`}
                   >
                     {likedPosts.has(post._id) ? (
                       <FaHeart className="text-red-500" />
                     ) : (
                       <FaRegHeart />
                     )}
-                    <span>Like</span>
+                    <span>{loading[post._id] ? '...' : 'Like'}</span>
                   </button>
 
                   <button
@@ -234,14 +429,28 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
                   >
                     {/* Lista de comentarios */}
                     {comments[post._id]?.map(comment => (
-                      <div key={comment.id} className="mb-3 flex items-start space-x-3">
+                      <div
+                        key={comment._id || comment.id}
+                        className="mb-3 flex items-start justify-between space-x-3"
+                      >
                         <div className="flex-1">
                           <div className="mb-1 flex items-center space-x-2">
                             <span className="text-sm font-semibold text-white">{comment.user}</span>
-                            <span className="text-xs text-white/40">{comment.timestamp}</span>
+                            <span className="text-xs text-white/40">
+                              {comment.timestamp || formatDate(comment.createdAt)}
+                            </span>
                           </div>
                           <p className="text-sm text-white/80">{comment.text}</p>
                         </div>
+                        {canDeleteComment(comment, post) && (
+                          <button
+                            onClick={() => openDeleteModal(post._id, comment._id, comment.text)}
+                            disabled={loading[`delete-${comment._id}`]}
+                            className="ml-2 text-white/40 transition-colors hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <FaTrash className="text-xs" />
+                          </button>
+                        )}
                       </div>
                     ))}
 
@@ -252,14 +461,16 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
                         value={newComment}
                         onChange={e => setNewComment(e.target.value)}
                         placeholder="Add a comment..."
-                        className="flex-1 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                        disabled={loading[`comment-${post._id}`]}
+                        className="flex-1 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:opacity-50"
                         onKeyPress={e => e.key === 'Enter' && handleAddComment(post._id)}
                       />
                       <button
                         onClick={() => handleAddComment(post._id)}
-                        className="rounded-lg bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600"
+                        disabled={loading[`comment-${post._id}`] || !newComment.trim()}
+                        className="rounded-lg bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Post
+                        {loading[`comment-${post._id}`] ? '...' : 'Post'}
                       </button>
                     </div>
                   </motion.div>
