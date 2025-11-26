@@ -4,6 +4,7 @@ import Register from '@/Screens/Register.jsx'
 import ForgotPassword from '@/Screens/Password/ForgotPassword.jsx'
 import ResetPassword from './Screens/Password/ResetPassword'
 import ProfileUser from './Screens/user/ProfileUser'
+import DiscoverFeed from './Screens/DiscoverFeed'
 
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { useEffect } from 'react'
@@ -54,6 +55,14 @@ function App() {
           element={
             <ProtectedRoute>
               <ProfileUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Feed"
+          element={
+            <ProtectedRoute>
+              <DiscoverFeed />
             </ProtectedRoute>
           }
         />
