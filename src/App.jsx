@@ -11,6 +11,7 @@ import { useEffect } from 'react'
 import { useUserStore } from './Store/useUserStore'
 import ProtectedRoute from './Routes/ProtectedRoute'
 import RedirectIfAuth from './Routes/RedirectIfAuth'
+import DiscoverPage from './Screens/DiscoverSearch'
 
 function App() {
   const ClientIdGoogle = import.meta.env.VITE_Client_ID
@@ -63,6 +64,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DiscoverFeed />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Discover"
+          element={
+            <ProtectedRoute>
+              <DiscoverPage />
             </ProtectedRoute>
           }
         />
