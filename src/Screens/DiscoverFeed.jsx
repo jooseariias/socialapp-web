@@ -1,28 +1,21 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  FaRegImage,
   FaRegHeart,
   FaHeart,
   FaRegComment,
   FaEllipsisH,
   FaTrash,
-  FaSearch,
-  FaBell,
-  FaHome,
-  FaPlus,
-  FaRegCompass,
-  FaRegUser,
   FaRegEnvelope,
   FaPlay,
   FaBookmark,
   FaRegBookmark,
 } from 'react-icons/fa'
 import { IoMdCheckmarkCircle } from 'react-icons/io'
+import Header from '../Components/Header'
 
 const HomePage = () => {
   // Estados principales
-  const [activeTab, setActiveTab] = useState('Posts')
   const [showComments, setShowComments] = useState(null)
   const [newComment, setNewComment] = useState('')
   const [expandedPosts, setExpandedPosts] = useState(new Set())
@@ -274,106 +267,14 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Header */}
-      <motion.header
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="sticky top-0 z-50 border-b border-white/10 bg-slate-900/80 backdrop-blur-sm"
-      >
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="flex h-16 items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-lg bg-blue-500"></div>
-              <span className="text-xl font-bold text-white">SocialApp</span>
-            </div>
-
-            {/* Search Bar */}
-            <div className="mx-8 max-w-2xl flex-1">
-              <div className="relative">
-                <FaSearch className="absolute top-1/2 left-3 -translate-y-1/2 transform text-white/40" />
-                <input
-                  type="text"
-                  placeholder="Buscar en SocialApp..."
-                  className="w-full rounded-full border border-white/10 bg-white/10 py-2 pr-4 pl-10 text-white placeholder-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Navigation Icons */}
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-white/60 transition-colors hover:text-white">
-                <FaHome className="text-xl" />
-              </button>
-              <button className="p-2 text-white/60 transition-colors hover:text-white">
-                <FaRegCompass className="text-xl" />
-              </button>
-              <button className="relative p-2 text-white/60 transition-colors hover:text-white">
-                <FaRegEnvelope className="text-xl" />
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                  3
-                </span>
-              </button>
-              <button className="relative p-2 text-white/60 transition-colors hover:text-white">
-                <FaBell className="text-xl" />
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                  12
-                </span>
-              </button>
-              <button className="p-2">
-                <img
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face"
-                  alt="Profile"
-                  className="h-8 w-8 rounded-full object-cover"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-      </motion.header>
-
-      <div className="mx-auto max-w-7xl px-4 py-6">
-        <div className="flex gap-6">
-          {/* Main Content - Feed */}
-          <div className="max-w-2xl flex-1">
-            {/* Stories o Create Post podría ir aquí */}
-
-            {/* Tabs */}
-            <motion.section
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mb-6"
-            >
-              <div className="relative flex justify-center gap-1 rounded-xl border border-white/10 bg-white/10 p-1 backdrop-blur-sm">
-                {[
-                  { name: 'Posts', icon: <FaRegImage /> },
-                  { name: 'Likes', icon: <FaRegHeart /> },
-                ].map(tab => {
-                  const isActive = activeTab === tab.name
-                  return (
-                    <motion.button
-                      key={tab.name}
-                      onClick={() => setActiveTab(tab.name)}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold transition-all ${
-                        isActive
-                          ? 'bg-blue-500 text-white shadow-md'
-                          : 'text-white/60 hover:text-white'
-                      }`}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      {tab.icon}
-                      {tab.name}
-                    </motion.button>
-                  )
-                })}
-              </div>
-            </motion.section>
-
-            {/* Posts */}
-            {activeTab === 'Posts' && postUser && (
+    <>
+      <Header />
+      <div className="flex min-h-screen justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="mx-auto max-w-7xl px-4 py-6">
+          <div className="flex gap-6">
+            {/* Main Content - Feed */}
+            <div className="max-w-2xl flex-1">
+              {/* Posts */}
               <div className="space-y-6">
                 {postUser.map(post => (
                   <motion.div
@@ -574,187 +475,148 @@ const HomePage = () => {
                   </motion.div>
                 ))}
               </div>
-            )}
+            </div>
 
-            {/* Vista de Likes */}
-            {activeTab === 'Likes' && (
+            {/* Sidebar - Usuarios Sugeridos (sin Top Creators) */}
+            <div className="hidden w-80 lg:block">
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="py-12 text-center"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="sticky top-24 space-y-6"
               >
-                <FaRegHeart className="mx-auto mb-4 text-4xl text-white/40" />
-                <h3 className="mb-2 text-xl font-semibold text-white">Posts que te gustan</h3>
-                <p className="text-white/60">Los posts que des like aparecerán aquí</p>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Sidebar - Usuarios Sugeridos */}
-          <div className="hidden w-80 lg:block">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="sticky top-24 space-y-6"
-            >
-              {/* Perfil del usuario actual */}
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-sm">
-                <div className="flex items-center space-x-3">
-                  <img
-                    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face"
-                    alt="Your profile"
-                    className="h-14 w-14 rounded-full object-cover"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white">Tu Nombre</h3>
-                    <p className="text-sm text-white/60">@username</p>
+                {/* Perfil del usuario actual */}
+                <div className="rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-sm">
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face"
+                      alt="Your profile"
+                      className="h-14 w-14 rounded-full object-cover"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-white">Tu Nombre</h3>
+                      <p className="text-sm text-white/60">@username</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="font-semibold text-white">245</div>
+                      <div className="text-xs text-white/60">Posts</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-white">1.2K</div>
+                      <div className="text-xs text-white/60">Followers</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-white">856</div>
+                      <div className="text-xs text-white/60">Following</div>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-4 grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <div className="font-semibold text-white">245</div>
-                    <div className="text-xs text-white/60">Posts</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-white">1.2K</div>
-                    <div className="text-xs text-white/60">Followers</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-white">856</div>
-                    <div className="text-xs text-white/60">Following</div>
-                  </div>
-                </div>
-              </div>
 
-              {/* Usuarios Sugeridos */}
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-sm">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="font-semibold text-white">Sugerencias para ti</h3>
-                  <button className="text-sm text-blue-400 transition-colors hover:text-blue-300">
-                    Ver todos
-                  </button>
-                </div>
+                {/* Usuarios Sugeridos */}
+                <div className="rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-sm">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="font-semibold text-white">Sugerencias para ti</h3>
+                    <button className="text-sm text-blue-400 transition-colors hover:text-blue-300">
+                      Ver todos
+                    </button>
+                  </div>
 
-                <div className="space-y-4">
-                  {suggestedUsers.map(user => (
-                    <div key={user.id} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={user.image}
-                          alt={user.name}
-                          className="h-10 w-10 rounded-full object-cover"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center space-x-1">
-                            <h4 className="truncate text-sm font-medium text-white">{user.name}</h4>
-                            {user.verified && (
-                              <IoMdCheckmarkCircle className="flex-shrink-0 text-blue-500" />
-                            )}
+                  <div className="space-y-4">
+                    {suggestedUsers.map(user => (
+                      <div key={user.id} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <img
+                            src={user.image}
+                            alt={user.name}
+                            className="h-10 w-10 rounded-full object-cover"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center space-x-1">
+                              <h4 className="truncate text-sm font-medium text-white">
+                                {user.name}
+                              </h4>
+                              {user.verified && (
+                                <IoMdCheckmarkCircle className="flex-shrink-0 text-blue-500" />
+                              )}
+                            </div>
+                            <p className="truncate text-xs text-white/60">{user.username}</p>
+                            <p className="text-xs text-white/40">{user.followers} followers</p>
                           </div>
-                          <p className="truncate text-xs text-white/60">{user.username}</p>
-                          <p className="text-xs text-white/40">{user.followers} followers</p>
                         </div>
+                        <button className="rounded-full bg-blue-500 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-600">
+                          Follow
+                        </button>
                       </div>
-                      <button className="rounded-full bg-blue-500 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-600">
-                        Follow
-                      </button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Trending Topics */}
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-sm">
-                <h3 className="mb-4 font-semibold text-white">Trending Worldwide</h3>
-                <div className="space-y-3">
-                  {[
-                    { topic: '#Travel', posts: '45.2K' },
-                    { topic: '#Photography', posts: '38.7K' },
-                    { topic: '#Nature', posts: '32.1K' },
-                    { topic: '#Art', posts: '28.9K' },
-                  ].map((trend, index) => (
-                    <div key={index} className="group cursor-pointer">
-                      <div className="text-sm font-medium text-white transition-colors group-hover:text-blue-400">
-                        {trend.topic}
+                {/* Trending Topics */}
+                <div className="rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-sm">
+                  <h3 className="mb-4 font-semibold text-white">Trending Worldwide</h3>
+                  <div className="space-y-3">
+                    {[
+                      { topic: '#Travel', posts: '45.2K' },
+                      { topic: '#Photography', posts: '38.7K' },
+                      { topic: '#Nature', posts: '32.1K' },
+                      { topic: '#Art', posts: '28.9K' },
+                    ].map((trend, index) => (
+                      <div key={index} className="group cursor-pointer">
+                        <div className="text-sm font-medium text-white transition-colors group-hover:text-blue-400">
+                          {trend.topic}
+                        </div>
+                        <div className="text-xs text-white/40">{trend.posts} posts</div>
                       </div>
-                      <div className="text-xs text-white/40">{trend.posts} posts</div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal de confirmación para borrar comentario */}
+        {deleteModal.show && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-slate-800 p-6 shadow-xl backdrop-blur-sm"
+            >
+              <h3 className="mb-4 text-xl font-semibold text-white">Eliminar comentario</h3>
+              <p className="mb-6 text-white/80">
+                ¿Estás seguro de que quieres eliminar este comentario?
+                <br />
+                <span className="mt-2 block text-sm text-white/60">
+                  "{deleteModal.commentText}"
+                </span>
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={closeDeleteModal}
+                  className="rounded-lg bg-white/10 px-4 py-2 text-white/80 transition-colors hover:bg-white/20"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleDeleteComment}
+                  disabled={loading[`delete-${deleteModal.commentId}`]}
+                  className="rounded-lg bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {loading[`delete-${deleteModal.commentId}`] ? 'Eliminando...' : 'Eliminar'}
+                </button>
               </div>
             </motion.div>
-          </div>
-        </div>
-      </div>
-
-      {/* Modal de confirmación para borrar comentario */}
-      {deleteModal.show && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-slate-800 p-6 shadow-xl backdrop-blur-sm"
-          >
-            <h3 className="mb-4 text-xl font-semibold text-white">Eliminar comentario</h3>
-            <p className="mb-6 text-white/80">
-              ¿Estás seguro de que quieres eliminar este comentario?
-              <br />
-              <span className="mt-2 block text-sm text-white/60">"{deleteModal.commentText}"</span>
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={closeDeleteModal}
-                className="rounded-lg bg-white/10 px-4 py-2 text-white/80 transition-colors hover:bg-white/20"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDeleteComment}
-                disabled={loading[`delete-${deleteModal.commentId}`]}
-                className="rounded-lg bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {loading[`delete-${deleteModal.commentId}`] ? 'Eliminando...' : 'Eliminar'}
-              </button>
-            </div>
           </motion.div>
-        </motion.div>
-      )}
-
-      {/* Bottom Navigation Mobile */}
-      <motion.nav
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="fixed right-0 bottom-0 left-0 z-40 border-t border-white/10 bg-slate-900/95 backdrop-blur-sm lg:hidden"
-      >
-        <div className="flex h-16 items-center justify-around">
-          <button className="flex flex-col items-center justify-center gap-1 text-blue-500">
-            <FaHome className="text-lg" />
-            <span className="text-xs">Home</span>
-          </button>
-          <button className="flex flex-col items-center justify-center gap-1 text-white/60">
-            <FaRegCompass className="text-lg" />
-            <span className="text-xs">Explore</span>
-          </button>
-          <button className="flex h-12 w-12 -translate-y-4 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg">
-            <FaPlus className="text-lg" />
-          </button>
-          <button className="flex flex-col items-center justify-center gap-1 text-white/60">
-            <FaRegEnvelope className="text-lg" />
-            <span className="text-xs">Messages</span>
-          </button>
-          <button className="flex flex-col items-center justify-center gap-1 text-white/60">
-            <FaRegUser className="text-lg" />
-            <span className="text-xs">Profile</span>
-          </button>
-        </div>
-      </motion.nav>
-    </div>
+        )}
+      </div>
+    </>
   )
 }
 
