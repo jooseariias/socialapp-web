@@ -12,6 +12,7 @@ import {
   FaPlay,
 } from 'react-icons/fa'
 import { IoMdCheckmarkCircle } from 'react-icons/io'
+import Header from '../Components/Header'
 
 const DiscoverPage = () => {
   const [activeFilter, setActiveFilter] = useState('All')
@@ -191,269 +192,262 @@ const DiscoverPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Top App Bar */}
-      <div className="sticky top-0 z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-4">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex items-center pb-2">
-            <div className="w-12 flex-shrink-0"></div>
-            <h2 className="flex-1 text-center text-lg leading-tight font-bold tracking-[-0.015em] text-white">
-              Discover
-            </h2>
-            <div className="flex w-12 items-center justify-end">
-              <button className="flex h-12 w-12 items-center justify-center rounded-lg bg-transparent text-white transition-colors hover:bg-white/10">
-                <FaBell className="text-xl" />
-              </button>
-            </div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="py-3">
-            <div className="flex h-12 w-full items-stretch rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm">
-              <div className="flex items-center justify-center pl-4 text-white/60">
-                <FaSearch />
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        {/* Top App Bar */}
+        <div className="sticky top-0 z-10 pt-4">
+          <div className="mx-auto max-w-6xl px-6">
+            {/* Search Bar */}
+            <div className="py-3">
+              <div className="flex h-12 w-full items-stretch rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm">
+                <div className="flex items-center justify-center pl-4 text-white/60">
+                  <FaSearch />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search for people or posts"
+                  className="flex-1 border-none bg-transparent px-4 text-base text-white placeholder-white/60 focus:outline-none"
+                />
               </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search for people or posts"
-                className="flex-1 border-none bg-transparent px-4 text-base text-white placeholder-white/60 focus:outline-none"
-              />
             </div>
-          </div>
 
-          {/* Segmented Buttons */}
-          <div className="py-3">
-            <div className="flex h-10 items-center justify-center rounded-xl border border-white/20 bg-white/10 p-1 backdrop-blur-sm">
-              {filters.map(filter => (
-                <button
-                  key={filter}
-                  onClick={() => setActiveFilter(filter)}
-                  className={`flex h-full flex-1 items-center justify-center rounded-lg px-2 text-sm font-medium transition-all duration-200 ${
-                    activeFilter === filter
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-white/60 hover:text-white'
-                  }`}
-                >
-                  <span className="truncate">{filter}</span>
-                </button>
-              ))}
+            {/* Segmented Buttons */}
+            <div className="py-3">
+              <div className="flex h-10 items-center justify-center rounded-xl border border-white/20 bg-white/10 p-1 backdrop-blur-sm">
+                {filters.map(filter => (
+                  <button
+                    key={filter}
+                    onClick={() => setActiveFilter(filter)}
+                    className={`flex h-full flex-1 items-center justify-center rounded-lg px-2 text-sm font-medium transition-all duration-200 ${
+                      activeFilter === filter
+                        ? 'bg-white text-slate-900 shadow-sm'
+                        : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    <span className="truncate">{filter}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 pb-8">
-        <div className="mx-auto max-w-6xl px-6">
-          {/* Trending People Section */}
-          {activeFilter !== 'Posts' && (
-            <>
-              <h2 className="pt-5 pb-3 text-xl leading-tight font-bold tracking-[-0.015em] text-white">
-                Trending People
-              </h2>
+        {/* Main Content Area */}
+        <main className="flex-1 pb-8">
+          <div className="mx-auto max-w-6xl px-6">
+            {/* Trending People Section */}
+            {activeFilter !== 'Posts' && (
+              <>
+                <h2 className="pt-5 pb-3 text-xl leading-tight font-bold tracking-[-0.015em] text-white">
+                  Trending People
+                </h2>
 
-              {/* Users Grid */}
-              <div className="grid grid-cols-2 gap-4 py-3 md:grid-cols-3 lg:grid-cols-6">
-                {trendingPeople.map(person => (
-                  <motion.div
-                    key={person.id}
-                    whileHover={{ scale: 1.05 }}
-                    className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm"
-                  >
-                    <div className="relative">
-                      <img
-                        src={person.image}
-                        alt={person.name}
-                        className="h-20 w-20 rounded-full object-cover ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-900"
-                      />
-                      {person.verified && (
-                        <div className="absolute -right-1 -bottom-1">
-                          <IoMdCheckmarkCircle className="rounded-full bg-white text-lg text-blue-500" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-center">
-                      <p className="truncate text-sm font-medium text-white">{person.name}</p>
-                      <p className="truncate text-xs text-white/60">{person.followers} followers</p>
-                    </div>
-                    <button className="w-full rounded-lg bg-blue-500 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-600">
-                      Follow
-                    </button>
-                  </motion.div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Popular Posts Section */}
-          {activeFilter !== 'People' && (
-            <>
-              <h2 className="pt-5 pb-3 text-xl leading-tight font-bold tracking-[-0.015em] text-white">
-                Popular Posts
-              </h2>
-
-              {/* Posts Grid */}
-              <div className="grid grid-cols-1 gap-6 py-3 lg:grid-cols-2">
-                {popularPosts.map(post => (
-                  <motion.div
-                    key={post.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur-sm"
-                  >
-                    {/* Header del post */}
-                    <div className="flex items-start justify-between p-6 pb-4">
-                      <div className="flex items-start space-x-3">
+                {/* Users Grid */}
+                <div className="grid grid-cols-2 gap-4 py-3 md:grid-cols-3 lg:grid-cols-6">
+                  {trendingPeople.map(person => (
+                    <motion.div
+                      key={person.id}
+                      whileHover={{ scale: 1.05 }}
+                      className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm"
+                    >
+                      <div className="relative">
                         <img
-                          src={post.user.image}
-                          alt={post.user.name}
-                          className="h-12 w-12 rounded-full object-cover"
+                          src={person.image}
+                          alt={person.name}
+                          className="h-20 w-20 rounded-full object-cover ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-900"
                         />
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                            <h3 className="font-semibold text-white">{post.user.name}</h3>
-                            {post.user.verified && (
-                              <IoMdCheckmarkCircle className="text-blue-500" />
-                            )}
+                        {person.verified && (
+                          <div className="absolute -right-1 -bottom-1">
+                            <IoMdCheckmarkCircle className="rounded-full bg-white text-lg text-blue-500" />
                           </div>
-                          <div className="mt-1 flex items-center space-x-4 text-sm text-white/60">
-                            <span>Follower</span>
-                            <span>•</span>
-                            <span>{formatDate(post.createdAt)}</span>
-                          </div>
-                        </div>
+                        )}
                       </div>
-                      <button className="rounded-full p-2 text-white/40 hover:bg-white/10 hover:text-white/60">
-                        <FaEllipsisH />
+                      <div className="text-center">
+                        <p className="truncate text-sm font-medium text-white">{person.name}</p>
+                        <p className="truncate text-xs text-white/60">
+                          {person.followers} followers
+                        </p>
+                      </div>
+                      <button className="w-full rounded-lg bg-blue-500 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-600">
+                        Follow
                       </button>
-                    </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </>
+            )}
 
-                    {/* Contenido del post - solo se muestra si existe */}
-                    {post.content && (
-                      <div className="px-6 pb-4">
-                        <p className="break-words text-white">{post.content}</p>
-                      </div>
-                    )}
+            {/* Popular Posts Section */}
+            {activeFilter !== 'People' && (
+              <>
+                <h2 className="pt-5 pb-3 text-xl leading-tight font-bold tracking-[-0.015em] text-white">
+                  Popular Posts
+                </h2>
 
-                    {/* Media del post */}
-                    {post.image && (
-                      <div className="overflow-hidden">
-                        {post.isVideo ? (
-                          <div
-                            className="relative aspect-[9/16] w-full bg-cover bg-center bg-no-repeat"
-                            style={{ backgroundImage: `url(${post.image})` }}
-                          >
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                              <button className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white">
-                                <FaPlay className="text-xl" />
-                              </button>
+                {/* Posts Grid */}
+                <div className="grid grid-cols-1 gap-6 py-3 lg:grid-cols-2">
+                  {popularPosts.map(post => (
+                    <motion.div
+                      key={post.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur-sm"
+                    >
+                      {/* Header del post */}
+                      <div className="flex items-start justify-between p-6 pb-4">
+                        <div className="flex items-start space-x-3">
+                          <img
+                            src={post.user.image}
+                            alt={post.user.name}
+                            className="h-12 w-12 rounded-full object-cover"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <h3 className="font-semibold text-white">{post.user.name}</h3>
+                              {post.user.verified && (
+                                <IoMdCheckmarkCircle className="text-blue-500" />
+                              )}
+                            </div>
+                            <div className="mt-1 flex items-center space-x-4 text-sm text-white/60">
+                              <span>Follower</span>
+                              <span>•</span>
+                              <span>{formatDate(post.createdAt)}</span>
                             </div>
                           </div>
-                        ) : (
-                          <img
-                            src={post.image}
-                            alt="Post content"
-                            className="h-auto w-full object-cover"
-                          />
-                        )}
-                      </div>
-                    )}
-
-                    {/* Contadores de interacciones */}
-                    <div className="flex items-center justify-between p-6 pt-4 text-sm text-white/60">
-                      <div className="flex items-center space-x-4">
-                        <span>{getLikeCount(post).toLocaleString()} likes</span>
-                        <span
-                          className="cursor-pointer transition-colors hover:text-blue-400"
-                          onClick={() => toggleComments(post.id)}
-                        >
-                          View all {post.comments} comments
-                        </span>
-                      </div>
-                      <span className="text-white/40">{post.shares} shares</span>
-                    </div>
-
-                    {/* Acciones del post */}
-                    <div className="flex space-x-6 border-t border-white/10 p-6 pt-3">
-                      <button
-                        onClick={() => handleLike(post.id)}
-                        className={`flex flex-1 items-center justify-center gap-2 transition-colors ${
-                          likedPosts.has(post.id)
-                            ? 'text-red-500'
-                            : 'text-white/60 hover:text-white'
-                        }`}
-                      >
-                        {likedPosts.has(post.id) ? (
-                          <FaHeart className="text-red-500" />
-                        ) : (
-                          <FaRegHeart />
-                        )}
-                        <span>Like</span>
-                      </button>
-
-                      <button
-                        onClick={() => toggleComments(post.id)}
-                        className="flex flex-1 items-center justify-center gap-2 text-white/60 transition-colors hover:text-white"
-                      >
-                        <FaRegComment />
-                        <span>Comment</span>
-                      </button>
-
-                      <button className="flex flex-1 items-center justify-center gap-2 text-white/60 transition-colors hover:text-white">
-                        <span>Share</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleBookmark(post.id)}
-                        className={`flex items-center gap-2 transition-colors ${
-                          bookmarkedPosts.has(post.id)
-                            ? 'text-blue-500'
-                            : 'text-white/60 hover:text-white'
-                        }`}
-                      >
-                        {bookmarkedPosts.has(post.id) ? (
-                          <FaBookmark className="text-blue-500" />
-                        ) : (
-                          <FaRegBookmark />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Sección de comentarios */}
-                    {showComments === post.id && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="border-t border-white/10 p-6 pt-4"
-                      >
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={newComment}
-                            onChange={e => setNewComment(e.target.value)}
-                            placeholder="Add a comment..."
-                            className="flex-1 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                          />
-                          <button
-                            onClick={() => setNewComment('')}
-                            disabled={!newComment.trim()}
-                            className="rounded-lg bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            Post
-                          </button>
                         </div>
-                      </motion.div>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </main>
-    </div>
+                        <button className="rounded-full p-2 text-white/40 hover:bg-white/10 hover:text-white/60">
+                          <FaEllipsisH />
+                        </button>
+                      </div>
+
+                      {/* Contenido del post - solo se muestra si existe */}
+                      {post.content && (
+                        <div className="px-6 pb-4">
+                          <p className="break-words text-white">{post.content}</p>
+                        </div>
+                      )}
+
+                      {/* Media del post */}
+                      {post.image && (
+                        <div className="overflow-hidden">
+                          {post.isVideo ? (
+                            <div
+                              className="relative aspect-[9/16] w-full bg-cover bg-center bg-no-repeat"
+                              style={{ backgroundImage: `url(${post.image})` }}
+                            >
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                <button className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white">
+                                  <FaPlay className="text-xl" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <img
+                              src={post.image}
+                              alt="Post content"
+                              className="h-auto w-full object-cover"
+                            />
+                          )}
+                        </div>
+                      )}
+
+                      {/* Contadores de interacciones */}
+                      <div className="flex items-center justify-between p-6 pt-4 text-sm text-white/60">
+                        <div className="flex items-center space-x-4">
+                          <span>{getLikeCount(post).toLocaleString()} likes</span>
+                          <span
+                            className="cursor-pointer transition-colors hover:text-blue-400"
+                            onClick={() => toggleComments(post.id)}
+                          >
+                            View all {post.comments} comments
+                          </span>
+                        </div>
+                        <span className="text-white/40">{post.shares} shares</span>
+                      </div>
+
+                      {/* Acciones del post */}
+                      <div className="flex space-x-6 border-t border-white/10 p-6 pt-3">
+                        <button
+                          onClick={() => handleLike(post.id)}
+                          className={`flex flex-1 items-center justify-center gap-2 transition-colors ${
+                            likedPosts.has(post.id)
+                              ? 'text-red-500'
+                              : 'text-white/60 hover:text-white'
+                          }`}
+                        >
+                          {likedPosts.has(post.id) ? (
+                            <FaHeart className="text-red-500" />
+                          ) : (
+                            <FaRegHeart />
+                          )}
+                          <span>Like</span>
+                        </button>
+
+                        <button
+                          onClick={() => toggleComments(post.id)}
+                          className="flex flex-1 items-center justify-center gap-2 text-white/60 transition-colors hover:text-white"
+                        >
+                          <FaRegComment />
+                          <span>Comment</span>
+                        </button>
+
+                        <button className="flex flex-1 items-center justify-center gap-2 text-white/60 transition-colors hover:text-white">
+                          <span>Share</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleBookmark(post.id)}
+                          className={`flex items-center gap-2 transition-colors ${
+                            bookmarkedPosts.has(post.id)
+                              ? 'text-blue-500'
+                              : 'text-white/60 hover:text-white'
+                          }`}
+                        >
+                          {bookmarkedPosts.has(post.id) ? (
+                            <FaBookmark className="text-blue-500" />
+                          ) : (
+                            <FaRegBookmark />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Sección de comentarios */}
+                      {showComments === post.id && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="border-t border-white/10 p-6 pt-4"
+                        >
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={newComment}
+                              onChange={e => setNewComment(e.target.value)}
+                              placeholder="Add a comment..."
+                              className="flex-1 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                            <button
+                              onClick={() => setNewComment('')}
+                              disabled={!newComment.trim()}
+                              className="rounded-lg bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Post
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </main>
+      </div>
+    </>
   )
 }
 

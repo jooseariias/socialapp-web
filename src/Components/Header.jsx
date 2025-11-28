@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { FaSearch, FaBell, FaPlus, FaHome, FaUser, FaCog } from 'react-icons/fa'
 import { useUserStore } from '../Store/useUserStore'
 import CreatePost from './CreatePost'
+import { Link } from 'react-router-dom'
 
 const Header = () => {
   const [showNotifications, setShowNotifications] = useState(false)
@@ -29,7 +30,9 @@ const Header = () => {
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-3">
-          <h1 className="text-xl font-bold tracking-tight text-white">NEVRYA</h1>
+          <Link to="/Feed">
+            <h1 className="text-xl font-bold tracking-tight text-white">NEVRYA</h1>
+          </Link>
         </motion.div>
 
         <div className="flex items-center gap-3">
@@ -39,14 +42,18 @@ const Header = () => {
             className="flex items-center gap-2 rounded-lg px-4 py-2 text-white transition-colors hover:bg-white/10"
           >
             <FaHome size={18} />
-            <span className="hidden sm:block">Inicio</span>
+            <Link to="/Feed">
+              <span className="hidden sm:block">Inicio</span>
+            </Link>
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="rounded-lg p-2 text-white transition-colors hover:bg-white/10"
           >
-            <FaSearch size={18} />
+            <Link to="/Discover">
+              <FaSearch size={18} />
+            </Link>
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -66,6 +73,7 @@ const Header = () => {
               className="relative rounded-lg p-2 text-white transition-colors hover:bg-white/10"
             >
               <FaBell size={18} />
+
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                   {unreadCount}
@@ -130,18 +138,19 @@ const Header = () => {
                   <p className="text-sm text-white/60">{user?.username}</p>
                 </div>
                 <div className="p-2">
-                  <button className="flex w-full items-center gap-3 rounded-lg p-3 text-left text-white transition-colors hover:bg-white/10">
-                    <FaUser size={16} />
-                    Mi Perfil
-                  </button>
-                  <button className="flex w-full items-center gap-3 rounded-lg p-3 text-left text-white transition-colors hover:bg-white/10">
-                    <FaCog size={16} />
-                    Configuración
-                  </button>
+                  <Link to="/ProfileUser">
+                    <button className="flex w-full items-center gap-3 rounded-lg p-3 text-left text-white transition-colors hover:bg-white/10">
+                      <FaUser size={16} />
+                      Mi Perfil
+                    </button>
+                  </Link>
+                  <Link to="/Comfig">
+                    <button className="flex w-full items-center gap-3 rounded-lg p-3 text-left text-white transition-colors hover:bg-white/10">
+                      <FaCog size={16} />
+                      Configuración
+                    </button>
+                  </Link>
                   <div className="my-2 border-t border-white/10"></div>
-                  <button className="flex w-full items-center gap-3 rounded-lg p-3 text-left text-red-400 transition-colors hover:bg-red-500/20">
-                    Cerrar Sesión
-                  </button>
                 </div>
               </motion.div>
             )}

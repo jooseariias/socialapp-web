@@ -12,6 +12,7 @@ import { useUserStore } from './Store/useUserStore'
 import ProtectedRoute from './Routes/ProtectedRoute'
 import RedirectIfAuth from './Routes/RedirectIfAuth'
 import DiscoverPage from './Screens/DiscoverSearch'
+import Comfig from './Screens/Comfig'
 
 function App() {
   const ClientIdGoogle = import.meta.env.VITE_Client_ID
@@ -72,6 +73,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DiscoverPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Comfig"
+          element={
+            <ProtectedRoute>
+              <Comfig />
             </ProtectedRoute>
           }
         />
