@@ -13,6 +13,8 @@ import {
 } from 'react-icons/fa'
 import { IoMdCheckmarkCircle } from 'react-icons/io'
 import Header from '../Components/Header'
+import FollowRecomend from '../Components/Follow/FollowRecomend'
+
 
 const HomePage = () => {
   // Estados principales
@@ -94,48 +96,7 @@ const HomePage = () => {
     ],
   })
 
-  const [suggestedUsers, setSuggestedUsers] = useState([
-    {
-      id: 1,
-      name: 'Emma Watson',
-      username: '@emmawatson',
-      image:
-        'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-      verified: true,
-      followers: '2.4M',
-      mutualFriends: 12,
-    },
-    {
-      id: 2,
-      name: 'Chris Evans',
-      username: '@chrisevans',
-      image:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-      verified: true,
-      followers: '3.1M',
-      mutualFriends: 8,
-    },
-    {
-      id: 3,
-      name: 'Taylor Swift',
-      username: '@taylorswift',
-      image:
-        'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face',
-      verified: true,
-      followers: '8.9M',
-      mutualFriends: 3,
-    },
-    {
-      id: 4,
-      name: 'Robert Downey Jr.',
-      username: '@robertdowneyjr',
-      image:
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-      verified: true,
-      followers: '4.2M',
-      mutualFriends: 15,
-    },
-  ])
+
 
   // Funciones de utilidad
   const truncateText = (text, postId) => {
@@ -369,11 +330,10 @@ const HomePage = () => {
                         <button
                           onClick={() => handleLike(post._id)}
                           disabled={loading[post._id]}
-                          className={`flex flex-1 items-center justify-center gap-2 transition-colors ${
-                            likedPosts.has(post._id)
+                          className={`flex flex-1 items-center justify-center gap-2 transition-colors ${likedPosts.has(post._id)
                               ? 'text-red-500'
                               : 'text-white/60 hover:text-white'
-                          } ${loading[post._id] ? 'cursor-not-allowed opacity-50' : ''}`}
+                            } ${loading[post._id] ? 'cursor-not-allowed opacity-50' : ''}`}
                         >
                           {likedPosts.has(post._id) ? (
                             <FaHeart className="text-red-500" />
@@ -398,11 +358,10 @@ const HomePage = () => {
 
                         <button
                           onClick={() => handleBookmark(post._id)}
-                          className={`flex items-center gap-2 transition-colors ${
-                            bookmarkedPosts.has(post._id)
+                          className={`flex items-center gap-2 transition-colors ${bookmarkedPosts.has(post._id)
                               ? 'text-blue-500'
                               : 'text-white/60 hover:text-white'
-                          }`}
+                            }`}
                         >
                           {bookmarkedPosts.has(post._id) ? (
                             <FaBookmark className="text-blue-500" />
@@ -515,44 +474,8 @@ const HomePage = () => {
                 </div>
 
                 {/* Usuarios Sugeridos */}
-                <div className="rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-sm">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="font-semibold text-white">Sugerencias para ti</h3>
-                    <button className="text-sm text-blue-400 transition-colors hover:text-blue-300">
-                      Ver todos
-                    </button>
-                  </div>
 
-                  <div className="space-y-4">
-                    {suggestedUsers.map(user => (
-                      <div key={user.id} className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <img
-                            src={user.image}
-                            alt={user.name}
-                            className="h-10 w-10 rounded-full object-cover"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center space-x-1">
-                              <h4 className="truncate text-sm font-medium text-white">
-                                {user.name}
-                              </h4>
-                              {user.verified && (
-                                <IoMdCheckmarkCircle className="flex-shrink-0 text-blue-500" />
-                              )}
-                            </div>
-                            <p className="truncate text-xs text-white/60">{user.username}</p>
-                            <p className="text-xs text-white/40">{user.followers} followers</p>
-                          </div>
-                        </div>
-                        <button className="rounded-full bg-blue-500 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-600">
-                          Follow
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
+                <FollowRecomend />
                 {/* Trending Topics */}
                 <div className="rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-sm">
                   <h3 className="mb-4 font-semibold text-white">Trending Worldwide</h3>
