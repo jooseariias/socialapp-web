@@ -14,6 +14,7 @@ import {
 import { IoMdCheckmarkCircle } from 'react-icons/io'
 import Header from '../Components/Header'
 import FollowRecomend from '../Components/Follow/FollowRecomend'
+import CardProfile from '../Components/profile/CardProfile' 
 
 
 const HomePage = () => {
@@ -445,34 +446,8 @@ const HomePage = () => {
                 className="sticky top-24 space-y-6"
               >
                 {/* Perfil del usuario actual */}
-                <div className="rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-sm">
-                  <div className="flex items-center space-x-3">
-                    <img
-                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face"
-                      alt="Your profile"
-                      className="h-14 w-14 rounded-full object-cover"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-white">Tu Nombre</h3>
-                      <p className="text-sm text-white/60">@username</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <div className="font-semibold text-white">245</div>
-                      <div className="text-xs text-white/60">Posts</div>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-white">1.2K</div>
-                      <div className="text-xs text-white/60">Followers</div>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-white">856</div>
-                      <div className="text-xs text-white/60">Following</div>
-                    </div>
-                  </div>
-                </div>
-
+               
+                <CardProfile />
                 {/* Usuarios Sugeridos */}
 
                 <FollowRecomend />
