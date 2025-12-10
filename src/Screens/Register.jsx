@@ -22,6 +22,23 @@ export default function Register() {
   const [backendError, setBackendError] = useState(null)
   const navigate = useNavigate()
 
+  const [cityQuery, setCityQuery] = useState("");
+  const [cityResults, setCityResults] = useState([]);
+
+  const searchCity = async (value) => {
+    setCityQuery(value);
+
+    if (value.length < 3) {
+      setCityResults([]);
+      return;
+    }
+
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(value)}`
+    );
+    const data = await res.json();
+    setCityResults(data);
+  };
   const fieldAnim = {
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
@@ -31,6 +48,7 @@ export default function Register() {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
     trigger,
   } = useForm({
     defaultValues: {
@@ -39,6 +57,8 @@ export default function Register() {
       password: '',
       gender: '',
       acceptTerms: false,
+      city: "",
+      location: null
     },
   })
 
@@ -208,6 +228,7 @@ export default function Register() {
                 )}
               />
 
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -218,6 +239,77 @@ export default function Register() {
             </div>
             {errors.password && <p className="text-sm text-red-200">{errors.password.message}</p>}
           </motion.div>
+
+          <motion.div variants={fieldAnim}>
+            <label className="mb-1 block font-medium">City</label>
+
+            <Controller
+              control={control}
+              name="city"
+              rules={{ required: "City is required" }}
+              render={({ field }) => (
+                <div className="relative">
+                  <input
+                    {...field}
+                    onChange={async (e) => {
+                      const value = e.target.value;
+                      field.onChange(value);
+
+                      if (value.length < 3) {
+                        setCityResults([]);
+                        return;
+                      }
+
+                      const res = await fetch(
+                        `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(
+                          value
+                        )}`
+                      );
+                      const data = await res.json();
+                      setCityResults(data);
+                    }}
+                    className="w-full rounded-lg border border-white/40 bg-gray-500/50 py-2 px-3 focus:ring-2 focus:ring-white focus:outline-none"
+                    placeholder="Search your city"
+                  />
+
+                  {cityResults.length > 0 && (
+                    <div className="absolute z-50 mt-1 w-full max-h-40 overflow-auto rounded-lg bg-white text-black shadow-lg">
+                      {cityResults.map((city, i) => {
+                        const name =
+                          city.address?.city ||
+                          city.address?.town ||
+                          city.address?.village ||
+                          city.display_name.split(",")[0];
+
+                        const country = city.address?.country || "";
+                        const text = `${name}${country ? ", " + country : ""}`;
+
+                        return (
+                          <div
+                            key={i}
+                            className="cursor-pointer px-3 py-2 hover:bg-gray-200"
+                            onClick={() => {
+                              field.onChange(text);
+                              setValue("location", { lat: city.lat, lon: city.lon });
+                              setCityResults([]);
+                            }}
+                          >
+                            {text}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            />
+
+            {errors.city && (
+              <p className="text-sm text-red-200">{errors.city.message}</p>
+            )}
+          </motion.div>
+
+
           <motion.div variants={fieldAnim}>
             <label className="mb-1 block font-medium">Gender</label>
             <Controller
@@ -241,11 +333,10 @@ export default function Register() {
                           field.onChange(option.label)
                           trigger('gender')
                         }}
-                        className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition ${
-                          field.value === option.label
-                            ? 'bg-button border-white font-bold text-white'
-                            : 'border-white/40 font-semibold text-white hover:border-white'
-                        }`}
+                        className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition ${field.value === option.label
+                          ? 'bg-button border-white font-bold text-white'
+                          : 'border-white/40 font-semibold text-white hover:border-white'
+                          }`}
                       >
                         {option.icon}
                         {option.label}

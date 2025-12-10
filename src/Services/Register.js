@@ -6,6 +6,9 @@ export async function postRegister(data) {
     email: data.email,
     password: data.password,
     gender: data.gender,
+    city: data.city,
+    location: data.location,
+
   }
 
   const response = await fetch(`${BACK_URL}/api/Register`, {
