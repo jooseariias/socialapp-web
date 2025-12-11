@@ -18,6 +18,7 @@ export default function ProfileUserCard({
   uploadLoading,
   handleImageChange,
 }) {
+  console.log('Rendering ProfileUserCard,',user)
   return (
     <div>
       <motion.section
@@ -150,7 +151,7 @@ export default function ProfileUserCard({
         ) : (
           <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 backdrop-blur-sm">
             <IoLocationOutline className="text-purple-300" />
-            <span className="text-white/90">{user?.location || profileData.location}</span>
+            <span className="text-white/90">{user?.city || profileData.location}</span>
           </div>
         )}
 

@@ -13,6 +13,7 @@ import ProtectedRoute from './Routes/ProtectedRoute'
 import RedirectIfAuth from './Routes/RedirectIfAuth'
 import DiscoverPage from './Screens/DiscoverSearch'
 import Comfig from './Screens/Comfig'
+import ProfileAddFollow from './Screens/user/ProfileAddFollow.jsx'
 
 function App() {
   const ClientIdGoogle = import.meta.env.VITE_Client_ID
@@ -81,6 +82,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Comfig />
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path="/AddFollow"
+          element={
+            <ProtectedRoute>
+              <ProfileAddFollow />
             </ProtectedRoute>
           }
         />

@@ -15,6 +15,7 @@ import { IoMdCheckmarkCircle } from 'react-icons/io'
 import Header from '../Components/Header'
 import FollowRecomend from '../Components/Follow/FollowRecomend'
 import CardProfile from '../Components/profile/CardProfile' 
+import TopFollowersCardMock from '../Components/Follow/TopFollow'
 
 
 const HomePage = () => {
@@ -446,9 +447,12 @@ const HomePage = () => {
                 className="sticky top-24 space-y-6"
               >
                 {/* Perfil del usuario actual */}
+
+               
                
                 <CardProfile />
                 {/* Usuarios Sugeridos */}
+                 <TopFollowersCardMock />
 
                 <FollowRecomend />
                 {/* Trending Topics */}
