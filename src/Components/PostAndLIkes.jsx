@@ -19,6 +19,7 @@ import postDelete from '../Services/post/deletePost'
 import putPost from '../Services/post/putPost'
 
 export default function PostAndLikes({ activeTab, setActiveTab }) {
+  
   const [postUser, setPostUser] = useState(null)
   const [likedPosts, setLikedPosts] = useState(new Set())
   const [comments, setComments] = useState({})

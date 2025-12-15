@@ -18,7 +18,6 @@ import EmojiPicker from 'emoji-picker-react'
 
 export default function PostCard({
   post,
-  currentUserId,
   formatDate,
   formatTime,
   postMenu,
@@ -58,6 +57,8 @@ export default function PostCard({
   expandedPosts
 }) {
   const localEmojiPickerRef = useRef(null)
+
+  console.log('Rendering PostCard,', post)
 
   return (
     <motion.div

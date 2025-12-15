@@ -4,6 +4,8 @@ import { getFollowRecomend } from '../../Services/follow/FollowRecomend'
 import { followUser } from '../../Services/follow/follow'
 import { unFollow } from '../../Services/follow/unFollow'
 
+import {Link} from 'react-router-dom'
+
 export default function FollowRecomendComponent() {
 
   const [suggestedUsers, setSuggestedUsers] = useState([])
@@ -11,6 +13,7 @@ export default function FollowRecomendComponent() {
   useEffect(() => {
     const fetchUsers = async () => {
       const result = await getFollowRecomend()
+      console.log(result)
       if (result.status === 200) {
         setSuggestedUsers(result.data)
       }
@@ -50,6 +53,7 @@ export default function FollowRecomendComponent() {
 
         <div className="space-y-4">
           {suggestedUsers.map(user => (
+            <Link to={`/AddFollow/${user._id}`} key={user._id} className='hover:cursor-pointer'>
             <div key={user._id} className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <img
@@ -79,7 +83,7 @@ export default function FollowRecomendComponent() {
                 {user.isFollowing ? 'Unfollow' : 'Follow'}
               </button>
 
-            </div>
+            </div></Link>
           ))}
         </div>
       </div>

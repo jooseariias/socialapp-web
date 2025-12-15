@@ -86,7 +86,7 @@ function App() {
           }
         />
         <Route 
-          path="/AddFollow"
+          path="/AddFollow/:id"
           element={
             <ProtectedRoute>
               <ProfileAddFollow />
