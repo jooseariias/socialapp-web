@@ -42,6 +42,8 @@ export default function ProfileAddFollow() {
   const [loading, setLoading] = useState(true)
   const [loadingFollow, setLoadingFollow] = useState(false)
   const { id } = useParams()
+  const [activePost, setActivePost] = useState(null)
+
   
   // Estados para posts
   const [postMenu, setPostMenu] = useState(null)
@@ -526,6 +528,7 @@ export default function ProfileAddFollow() {
               src={post.user.image}
               alt={post.user.name}
               className="h-10 w-10 rounded-full object-cover"
+
             />
             <div className="flex-1">
               <div className="flex items-center space-x-2">
@@ -581,7 +584,8 @@ export default function ProfileAddFollow() {
           </div>
 
           {post.image && (
-            <div className="mt-4 overflow-hidden rounded-xl">
+            <div onClick={() => setActivePost(post)}
+ className="mt-4 overflow-hidden rounded-xl">
               <img
                 src={post.image}
                 alt="Contenido de la publicación"
@@ -1068,6 +1072,128 @@ export default function ProfileAddFollow() {
           )}
         </div>
       </div>
+      {activePost && (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+    onClick={() => setActivePost(null)}
+  >
+    <motion.div
+      initial={{ scale: 0.95, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      onClick={e => e.stopPropagation()}
+      className="relative flex max-h-[95vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-[#2b0a3d]"
+    >
+      {/* Imagen */}
+      <div className="flex flex-1 items-center justify-center bg-black/40">
+        <img
+          src={activePost.image}
+          className="max-h-full max-w-full object-contain"
+        />
+      </div>
+
+      {/* Panel derecho */}
+      <div className="flex w-96 flex-col border-l border-white/10">
+        {/* Header */}
+        <div className="flex items-center gap-3 border-b border-white/10 p-4">
+          <img
+            src={activePost.user.image}
+            className="h-10 w-10 rounded-full object-cover"
+          />
+          <div>
+            <p className="font-semibold text-white">{activePost.user.name}</p>
+            <span className="text-xs text-white/50">
+              {formatDate(activePost.createdAt)}
+            </span>
+          </div>
+        </div>
+
+        {/* Texto */}
+        <div className="p-4 text-sm text-white break-words">
+          {activePost.content}
+        </div>
+
+        {/* Stats */}
+        <div className="flex justify-between px-4 text-sm text-white/60">
+          <span>{formatNumber(getLikeCount(activePost))} me gusta</span>
+          <span>
+            {(comments[activePost._id] || activePost.comments || []).length} comentarios
+          </span>
+        </div>
+
+        {/* Acciones */}
+        <div className="mt-3 flex border-t border-white/10">
+          <button
+            onClick={() => handleLike(activePost._id)}
+            className={`flex flex-1 items-center justify-center gap-2 py-3 ${
+              likedPosts.has(activePost._id)
+                ? 'text-red-500'
+                : 'text-white/60 hover:text-red-400'
+            }`}
+          >
+            {likedPosts.has(activePost._id) ? <FaHeart /> : <FaRegHeart />}
+            Me gusta
+          </button>
+
+          <button
+            onClick={() => toggleComments(activePost._id)}
+            className="flex flex-1 items-center justify-center gap-2 py-3 text-white/60 hover:text-white"
+          >
+            <FaRegComment />
+            Comentar
+          </button>
+
+          <button className="flex flex-1 items-center justify-center gap-2 py-3 text-white/60 hover:text-white">
+            <FaShare />
+            Compartir
+          </button>
+        </div>
+
+        {/* Comentarios */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+          {(comments[activePost._id] || []).map(comment => (
+            <div key={comment._id} className="flex gap-3">
+              <img
+                src={comment.userImage}
+                className="h-8 w-8 rounded-full object-cover"
+              />
+              <div>
+                <p className="text-sm text-white">
+                  <b>{comment.user}</b>{' '}
+                  <span className="text-white/70">{comment.text}</span>
+                </p>
+                <span className="text-xs text-white/40">
+                  {formatTime(comment.createdAt)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Input */}
+        <div className="border-t border-white/10 p-4 flex gap-2">
+          <input
+            value={newComment}
+            onChange={e => setNewComment(e.target.value)}
+            placeholder="Escribe un comentario..."
+            className="flex-1 rounded-lg bg-white/5 px-3 py-2 text-sm text-white outline-none"
+            onKeyDown={e =>
+              e.key === 'Enter' && handleAddComment(activePost._id)
+            }
+          />
+          <button
+            onClick={() => handleAddComment(activePost._id)}
+            className="rounded-lg bg-blue-600 px-3 text-white"
+          >
+            <FaPaperPlane />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  </motion.div>
+)}
+
     </div>
   )
 }
