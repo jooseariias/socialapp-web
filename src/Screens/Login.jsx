@@ -6,6 +6,7 @@ import { motion } from 'motion/react'
 import Google from '../Utils/Auth'
 import login from '../Services/login'
 import { useNavigate } from 'react-router-dom'
+import { useUserStore } from '../Store/useUserStore'
 
 export default function Login() {
   const {
@@ -19,6 +20,8 @@ export default function Login() {
   const [backendMessage, setBackendMessage] = useState(null)
   const [backendError, setBackendError] = useState(null)
   const navigate = useNavigate()
+  const setIsActive = useUserStore(state => state.setIsActive)
+
 
   const onSubmit = async data => {
     setLoading(true)
@@ -27,11 +30,10 @@ export default function Login() {
 
     try {
       const result = await login(data.email, data.password)
-      setLoading(false)
 
       if (result.status === 200) {
+        setIsActive(true)
         setBackendMessage(result.message)
-        setTimeout(() => navigate('/Feed'), 2000)
       } else {
         setBackendError(result.message || result.error || 'Error desconocido')
       }
@@ -109,9 +111,8 @@ export default function Login() {
                   })}
                   onKeyUp={() => trigger('email')}
                   placeholder="Enter your email"
-                  className={`h-14 w-full rounded-lg border bg-white/50 pr-4 pl-12 ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`h-14 w-full rounded-lg border bg-white/50 pr-4 pl-12 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 />
               </div>
               {errors.email && <p className="mt-1 text-sm text-red-300">{errors.email.message}</p>}
@@ -133,9 +134,8 @@ export default function Login() {
                   })}
                   onKeyUp={() => trigger('password')}
                   placeholder="Enter your password"
-                  className={`h-14 w-full rounded-lg border bg-white/50 pr-12 pl-12 ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`h-14 w-full rounded-lg border bg-white/50 pr-12 pl-12 ${errors.password ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 />
                 <button
                   type="button"

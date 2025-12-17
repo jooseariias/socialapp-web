@@ -34,7 +34,7 @@ export default function ProfileUserCard({
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <img
-              src={user?.image || profileData.profileImage}
+              src={user?.image || profileData?.profileImage}
               alt="profile"
               className="h-32 w-32 rounded-full border-4 border-purple-400/50 object-cover shadow-lg"
             />
