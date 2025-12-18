@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import {
   MdVisibilityOff,
@@ -10,8 +10,9 @@ import {
   MdFemale,
   MdTransgender,
   MdArrowBack,
+  MdPublic,
 } from 'react-icons/md'
-import { motion } from 'motion/react'
+import { motion, AnimatePresence } from 'motion/react'
 import { postRegister } from '../Services/Register'
 import { useNavigate } from 'react-router-dom'
 
@@ -22,23 +23,39 @@ export default function Register() {
   const [backendError, setBackendError] = useState(null)
   const navigate = useNavigate()
 
-  const [cityQuery, setCityQuery] = useState("");
-  const [cityResults, setCityResults] = useState([]);
+  // --- NUEVA LÓGICA DE PAÍSES ---
+  const [countries, setCountries] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showDropdown, setShowDropdown] = useState(false)
 
-  const searchCity = async (value) => {
-    setCityQuery(value);
-
-    if (value.length < 3) {
-      setCityResults([]);
-      return;
+  // Carga inicial de países con coordenadas
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await fetch('https://restcountries.com/v3.1/all?fields=name,latlng')
+        const data = await res.json()
+        const formatted = data.map(c => ({
+          name: c.name.common,
+          lat: c.latlng[0],
+          lon: c.latlng[1]
+        })).sort((a, b) => a.name.localeCompare(b.name))
+        setCountries(formatted)
+      } catch (err) {
+        console.error("Error cargando países", err)
+      }
     }
+    fetchCountries()
+  }, [])
 
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(value)}`
-    );
-    const data = await res.json();
-    setCityResults(data);
-  };
+  // Filtrado ultra rápido en memoria
+  const filteredCountries = useMemo(() => {
+    if (searchTerm.length < 2) return []
+    return countries.filter(c => 
+      c.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ).slice(0, 5)
+  }, [searchTerm, countries])
+  // ------------------------------
+
   const fieldAnim = {
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
@@ -57,7 +74,7 @@ export default function Register() {
       password: '',
       gender: '',
       acceptTerms: false,
-      city: "",
+      country: "", // Cambiado de city a country
       location: null
     },
   })
@@ -73,7 +90,8 @@ export default function Register() {
       if (result.status === 201) {
         setBackendMessage(result.message)
         setTimeout(() => {
-          setBackendMessage(null) / navigate('/')
+          setBackendMessage(null)
+          navigate('/')
         }, 3000)
       } else if (result.message || result.error) {
         setBackendError(result.message || result.error)
@@ -187,6 +205,7 @@ export default function Register() {
             </div>
             {errors.username && <p className="text-sm text-red-200">{errors.username.message}</p>}
           </motion.div>
+
           <motion.div variants={fieldAnim}>
             <label className="mb-1 block font-medium">Email</label>
             <div className="relative">
@@ -210,6 +229,7 @@ export default function Register() {
             </div>
             {errors.email && <p className="text-sm text-red-200">{errors.email.message}</p>}
           </motion.div>
+
           <motion.div variants={fieldAnim}>
             <label className="mb-1 block font-medium">Password</label>
             <div className="relative">
@@ -227,8 +247,6 @@ export default function Register() {
                   />
                 )}
               />
-
-
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -240,75 +258,59 @@ export default function Register() {
             {errors.password && <p className="text-sm text-red-200">{errors.password.message}</p>}
           </motion.div>
 
+          {/* CAMPO DE PAÍS CORREGIDO */}
           <motion.div variants={fieldAnim}>
-            <label className="mb-1 block font-medium">City</label>
-
+            <label className="mb-1 block font-medium">Country</label>
             <Controller
               control={control}
-              name="city"
-              rules={{ required: "City is required" }}
+              name="country"
+              rules={{ required: "Country is required" }}
               render={({ field }) => (
                 <div className="relative">
+                  <MdPublic className="absolute top-3 left-3 text-white/70" size={22} />
                   <input
                     {...field}
-                    onChange={async (e) => {
-                      const value = e.target.value;
-                      field.onChange(value);
-
-                      if (value.length < 3) {
-                        setCityResults([]);
-                        return;
-                      }
-
-                      const res = await fetch(
-                        `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(
-                          value
-                        )}`
-                      );
-                      const data = await res.json();
-                      setCityResults(data);
+                    autoComplete="off"
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      field.onChange(e.target.value);
+                      setShowDropdown(true);
                     }}
-                    className="w-full rounded-lg border border-white/40 bg-gray-500/50 py-2 px-3 focus:ring-2 focus:ring-white focus:outline-none"
-                    placeholder="Search your city"
+                    onFocus={() => setShowDropdown(true)}
+                    className="w-full rounded-lg border border-white/40 bg-gray-500/50 py-2 pr-3 pl-10 focus:ring-2 focus:ring-white focus:outline-none"
+                    placeholder="Search your country"
                   />
 
-                  {cityResults.length > 0 && (
-                    <div className="absolute z-50 mt-1 w-full max-h-40 overflow-auto rounded-lg bg-white text-black shadow-lg">
-                      {cityResults.map((city, i) => {
-                        const name =
-                          city.address?.city ||
-                          city.address?.town ||
-                          city.address?.village ||
-                          city.display_name.split(",")[0];
-
-                        const country = city.address?.country || "";
-                        const text = `${name}${country ? ", " + country : ""}`;
-
-                        return (
+                  <AnimatePresence>
+                    {showDropdown && filteredCountries.length > 0 && (
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute z-50 mt-1 w-full max-h-40 overflow-auto rounded-lg bg-white text-black shadow-lg"
+                      >
+                        {filteredCountries.map((c, i) => (
                           <div
                             key={i}
-                            className="cursor-pointer px-3 py-2 hover:bg-gray-200"
+                            className="cursor-pointer px-3 py-2 hover:bg-gray-200 border-b border-gray-100 last:border-none"
                             onClick={() => {
-                              field.onChange(text);
-                              setValue("location", { lat: city.lat, lon: city.lon });
-                              setCityResults([]);
+                              field.onChange(c.name);
+                              setValue("location", { lat: c.lat, lon: c.lon });
+                              setSearchTerm(c.name);
+                              setShowDropdown(false);
                             }}
                           >
-                            {text}
+                            {c.name}
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
             />
-
-            {errors.city && (
-              <p className="text-sm text-red-200">{errors.city.message}</p>
-            )}
+            {errors.country && <p className="text-sm text-red-200">{errors.country.message}</p>}
           </motion.div>
-
 
           <motion.div variants={fieldAnim}>
             <label className="mb-1 block font-medium">Gender</label>
@@ -343,14 +345,12 @@ export default function Register() {
                       </motion.button>
                     ))}
                   </div>
-
-                  {errors.gender && (
-                    <p className="mt-1 text-center text-sm text-red-200">{errors.gender.message}</p>
-                  )}
+                  {errors.gender && <p className="mt-1 text-center text-sm text-red-200">{errors.gender.message}</p>}
                 </>
               )}
             />
           </motion.div>
+
           <motion.div variants={fieldAnim} className="flex flex-col items-center text-center">
             <div className="flex items-center gap-3">
               <Controller
@@ -366,17 +366,14 @@ export default function Register() {
                   />
                 )}
               />
-
               <p className="text-white/90">
                 I accept the <span className="text-button cursor-pointer underline">Terms</span> and{' '}
                 <span className="text-button cursor-pointer underline">Privacy Policy</span>.
               </p>
             </div>
-
-            {errors.acceptTerms && (
-              <p className="mt-1 text-sm text-red-200">{errors.acceptTerms.message}</p>
-            )}
+            {errors.acceptTerms && <p className="mt-1 text-sm text-red-200">{errors.acceptTerms.message}</p>}
           </motion.div>
+
           <motion.button
             type="submit"
             disabled={loading}
@@ -387,12 +384,6 @@ export default function Register() {
             {loading ? 'CREATING USER...' : 'Create Account'}
           </motion.button>
         </motion.form>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="w/full flex max-w-md items-center gap-3"
-        ></motion.div>
 
         <p className="mt-5 text-center text-sm text-white/80">
           By signing up, you agree to our <span className="cursor-pointer underline">Terms</span>{' '}

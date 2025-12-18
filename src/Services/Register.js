@@ -1,15 +1,19 @@
 const BACK_URL = import.meta.env.VITE_BACK_URL
 
 export async function postRegister(data) {
+
+  console.log(data,"data")
+
   const user = {
     name: data.username,
     email: data.email,
     password: data.password,
     gender: data.gender,
-    city: data.city,
+    city: data.country,
     location: data.location,
 
   }
+  console.log(user)
 
   const response = await fetch(`${BACK_URL}/api/Register`, {
     method: 'POST',
