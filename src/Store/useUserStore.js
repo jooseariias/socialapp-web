@@ -81,5 +81,23 @@ export const useUserStore = create((set, get) => ({
   },
 
   // Limpieza total
-  logout: () => set({ user: null, isActive: false, loading: false }),
+  // Dentro de tu useUserStore en Zustand
+  logout: async () => {
+    try {
+      // Llamamos a la nueva ruta del backend
+      await fetch(`${BACK_URL}/api/Logout`, {
+        method: 'POST', // Asegúrate de que coincida con tu router
+        credentials: 'include', // REQUERIDO para enviar/recibir cookies
+      });
+    } catch (err) {
+      console.error("Error al contactar con el servidor para logout:", err);
+    } finally {
+      // Limpiamos el estado local pase lo que pase en el servidor
+      set({ 
+        user: null, 
+        isActive: false, 
+        loading: false 
+      });
+    }
+  },
 }))
