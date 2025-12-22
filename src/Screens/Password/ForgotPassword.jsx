@@ -25,7 +25,6 @@ export default function ForgotPassword() {
     setCooldown(180)
     setTimeout(() => {
       alert('Reset link enviado')
-      console.log(data)
     }, 1200)
   }
 

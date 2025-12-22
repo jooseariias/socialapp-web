@@ -18,7 +18,7 @@ import { useUserStore } from '../Store/useUserStore'
 
 import postLike from '../Services/post/postLike'
 import postUnLike from '../Services/post/postUnLike'
-import deleteComment from '../Services/post/deleteComment'
+import postDeleteComment from '../Services/post/deleteComment'
 import postCreateComment from '../Services/post/costCreateComment'
 
 const FeedPostCard = ({ post, onCommentUpdate }) => {
@@ -32,6 +32,11 @@ const FeedPostCard = ({ post, onCommentUpdate }) => {
   const [comment, setComment] = useState('')
   const [loading, setLoading] = useState(false)
   const [commentLoading, setCommentLoading] = useState(false)
+
+  // Estados para el modal de confirmación
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [commentToDelete, setCommentToDelete] = useState(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   // Estado único para todos los comentarios
   const [comments, setComments] = useState(() => {
@@ -124,85 +129,99 @@ const FeedPostCard = ({ post, onCommentUpdate }) => {
       setLoading(false)
     }
   }
-
   const handleAddComment = async e => {
     e.preventDefault()
-    if (!currentUser) {
-      alert('Debes iniciar sesión para comentar')
-      return
-    }
+    if (!currentUser || !comment.trim()) return
 
-    if (!comment.trim()) return
-
-    const commentText = comment.trim()
     setCommentLoading(true)
-
     try {
-      // 1. Crear comentario temporal inmediatamente
-      const tempComment = {
-        _id: `temp_${Date.now()}`,
-        user: {
-          _id: currentUser._id,
-          name: currentUser.name,
-          username: currentUser.username,
-          image: currentUser.image,
-        },
-        text: commentText,
-        createdAt: new Date().toISOString(),
-      }
-
-      // Agregar al estado inmediatamente (al inicio del array)
-      setComments(prev => [tempComment, ...prev])
-      setComment('')
-
-      // Mostrar la sección de comentarios si no está visible
-      if (!showComments) {
-        setShowComments(true)
-      }
-
-      // 2. Enviar a la API
-      const result = await postCreateComment(post._id, commentText)
+      const result = await postCreateComment(post._id, comment.trim())
 
       if (result.status === 200 || result.status === 201) {
-        // Crear comentario final con posible ID del servidor
-        const finalComment = {
-          _id: result.data?._id || tempComment._id.replace('temp_', 'server_'),
-          user: {
-            _id: currentUser._id,
-            name: currentUser.name,
-            username: currentUser.username,
-            image: currentUser.image,
-          },
-          text: commentText,
-          createdAt: new Date().toISOString(),
-        }
+        // 1. Obtenemos el array de comentarios que viene del BACKEND (data.comments)
+        const commentsFromBackend = result.data.comments
 
-        // Reemplazar el temporal con el final
-        setComments(prev =>
-          prev.map(comment => (comment._id === tempComment._id ? finalComment : comment)),
-        )
+        // 2. Mapeamos esos comentarios para asegurarnos de que el usuario actual
+        // tenga sus datos completos (imagen, nombre) si el backend no los envía completos
+        const updatedComments = commentsFromBackend.map(c => {
+          // Si el ID del usuario del comentario coincide con el logueado,
+          // nos aseguramos de inyectar los datos del Store por si acaso
+          if (String(c.user?._id || c.user) === String(currentUser._id)) {
+            return {
+              ...c,
+              user: {
+                _id: currentUser._id,
+                name: currentUser.name,
+                username: currentUser.username,
+                image: currentUser.image,
+              },
+            }
+          }
+          return c
+        })
 
-        // Notificar al padre con el nuevo conteo
+        // 3. Reemplazamos TODO el estado con la lista real del servidor
+        // Ordenar por fecha si es necesario (el back suele enviarlos ya ordenados)
+        setComments(updatedComments.reverse()) // .reverse() solo si quieres el más nuevo arriba
+
+        setComment('')
+        if (!showComments) setShowComments(true)
+
         if (onCommentUpdate) {
-          onCommentUpdate(post._id, comments.length + 1)
+          onCommentUpdate(post._id, updatedComments.length)
         }
       }
     } catch (error) {
       console.error('Error al comentar:', error)
-      // Mantener el comentario temporal aunque falle la API
     } finally {
       setCommentLoading(false)
     }
   }
+  // Función para abrir el modal de confirmación
+  const handleDeleteClick = (commentOwnerId, commentId) => {
+    setCommentToDelete({ commentOwnerId, commentId })
+    setShowDeleteConfirm(true)
+  }
 
-  const handleDeleteComment = async commentId => {}
+  // Función para confirmar la eliminación
+  const handleConfirmDelete = async () => {
+    if (!commentToDelete) return
 
+    const { commentOwnerId, commentId } = commentToDelete
+    setDeleteLoading(true)
+
+    try {
+      const result = await postDeleteComment(commentId, commentOwnerId)
+      if (result.status === 200) {
+        // Eliminar del estado
+        setComments(prev => prev.filter(c => c._id !== commentId))
+        // Cerrar modal
+        setShowDeleteConfirm(false)
+        setCommentToDelete(null)
+      }
+    } catch (error) {
+      console.error('Error al eliminar comentario:', error)
+      alert('Error al eliminar el comentario')
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
+
+  // Función para cancelar la eliminación
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false)
+    setCommentToDelete(null)
+  }
+
+  // CORREGIDO: Comparar correctamente los IDs
   const isCurrentUserComment = useCallback(
-    commentOwnerId => {
-      return String(commentOwnerId) === String(currentUser.id)
+    commentUserId => {
+      if (!currentUser || !commentUserId) return false
+      return String(commentUserId) === String(currentUser._id || currentUser.id)
     },
     [currentUser],
   )
+  const isTempComment = id => String(id).startsWith('temp_')
 
   // Manejar valores por defecto
   const postImage = post?.image || ''
@@ -379,10 +398,10 @@ const FeedPostCard = ({ post, onCommentUpdate }) => {
                             {formatDate(commentItem.createdAt)}
                           </p>
 
-                          {/* BOTÓN DE ELIMINAR */}
-                          {isCurrentUserComment(commentItem?.user?._id) && (
+                          {/* BOTÓN DE ELIMINAR - CORREGIDO: usar commentItem.user?._id */}
+                          {isCurrentUserComment(commentItem.user?._id) && (
                             <button
-                              onClick={() => handleDeleteComment(commentItem._id)}
+                              onClick={() => handleDeleteClick(post._id, commentItem._id)}
                               className="ml-2 text-white/30 transition-colors hover:text-red-500"
                               title="Eliminar mi comentario"
                             >
@@ -401,7 +420,7 @@ const FeedPostCard = ({ post, onCommentUpdate }) => {
         </AnimatePresence>
       </motion.div>
 
-      {/* MODAL - USANDO EL MISMO ESTADO comments */}
+      {/* MODAL DE IMAGEN - USANDO EL MISMO ESTADO comments */}
       <AnimatePresence>
         {showModal && (
           <>
@@ -481,13 +500,14 @@ const FeedPostCard = ({ post, onCommentUpdate }) => {
                               <span className="text-xs text-white/40">
                                 {formatDate(c.createdAt)}
                               </span>
-                              {isCurrentUserComment(c) && (
-                                <FaTrash
-                                  onClick={() => handleDeleteComment(c._id)}
-                                  className="cursor-pointer text-white/40 hover:text-red-500"
-                                  size={12}
-                                />
-                              )}
+                              {isCurrentUserComment(c.user?._id) &&
+                                !(
+                                  <FaTrash
+                                    onClick={() => handleDeleteClick(post._id, c._id)}
+                                    className="cursor-pointer text-white/40 hover:text-red-500"
+                                    size={12}
+                                  />
+                                )}
                             </div>
                           </div>
                         </div>
@@ -518,6 +538,83 @@ const FeedPostCard = ({ post, onCommentUpdate }) => {
                     </form>
                   </div>
                 </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL DE CONFIRMACIÓN PARA ELIMINAR COMENTARIO */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCancelDelete}
+              className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md"
+            />
+
+            {/* Modal de confirmación */}
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={e => e.stopPropagation()}
+                className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800/90 via-purple-900/90 to-slate-800/90 p-6 shadow-xl"
+              >
+                {/* Icono de advertencia */}
+                <div className="mb-4 flex justify-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-500/20">
+                    <FaTrash className="text-2xl text-red-500" />
+                  </div>
+                </div>
+
+                {/* Título */}
+                <h3 className="mb-2 text-center text-xl font-semibold text-white">
+                  ¿Eliminar comentario?
+                </h3>
+
+                {/* Descripción */}
+                <p className="mb-6 text-center text-white/70">
+                  Esta acción no se puede deshacer. El comentario se eliminará permanentemente.
+                </p>
+
+                {/* Botones de acción */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleCancelDelete}
+                    disabled={deleteLoading}
+                    className="flex-1 rounded-lg border border-white/20 bg-transparent px-4 py-3 text-white/70 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleConfirmDelete}
+                    disabled={deleteLoading}
+                    className="flex-1 rounded-lg bg-gradient-to-r from-red-600 to-red-700 px-4 py-3 font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {deleteLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                        Eliminando...
+                      </span>
+                    ) : (
+                      'Sí, eliminar'
+                    )}
+                  </button>
+                </div>
+
+                {/* Botón de cierre (opcional) */}
+                <button
+                  onClick={handleCancelDelete}
+                  className="absolute top-4 right-4 text-white/40 hover:text-white"
+                >
+                  <FaTimes size={18} />
+                </button>
               </motion.div>
             </div>
           </>

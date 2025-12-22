@@ -116,7 +116,7 @@ export default function ProfileAddFollow() {
             ...prev,
             followers: Math.max(0, (prev.followers || 0) - 1)
           }))
-          console.log('Dejaste de seguir a', userData.name)
+   
         } else {
           alert('Error al dejar de seguir')
         }
@@ -131,7 +131,7 @@ export default function ProfileAddFollow() {
             ...prev,
             followers: (prev.followers || 0) + 1
           }))
-          console.log('Ahora sigues a', userData.name)
+      
         } else {
           alert('Error al seguir')
         }
@@ -145,7 +145,7 @@ export default function ProfileAddFollow() {
   }
 
   const handleReport = () => {
-    console.log('Reportando perfil')
+    
     alert('Reporte enviado')
     setShowReport(false)
   }
@@ -157,7 +157,7 @@ export default function ProfileAddFollow() {
   }
 
   const handleReportPost = (postId) => {
-    console.log('Reportando post:', postId)
+ 
     alert('Post reportado')
     setPostMenu(null)
   }

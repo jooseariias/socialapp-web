@@ -48,7 +48,7 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
   useEffect(() => {
     const getPostUserData = async () => {
       const result = await getPostUser()
-      console.log('result', result)
+
       if (result.status >= 400) {
         throw new Error(result.error || 'Error getting posts')
       }
@@ -175,7 +175,6 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
   }
 
   const handleReportPost = postId => {
-    console.log(`Reporting post ${postId}`)
     setPostMenu(null)
     alert(`Post ${postId} reported`)
   }

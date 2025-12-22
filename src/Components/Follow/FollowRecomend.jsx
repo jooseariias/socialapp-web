@@ -13,7 +13,6 @@ export default function FollowRecomendComponent() {
   useEffect(() => {
     const fetchUsers = async () => {
       const result = await getFollowRecomend()
-      console.log(result)
       if (result.status === 200) {
         setSuggestedUsers(result.data)
       }

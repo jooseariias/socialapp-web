@@ -20,14 +20,14 @@ export default function GoogleButton() {
           })
 
           const data = await res.json()
-          console.log('Respuesta backend:', data)
+         
         } catch (error) {
           console.error('Error posting Google token:', error)
         }
       }
       postGoogleToken()
 
-      console.log('Login Success:', tokenResponse.access_token)
+ 
     },
     onError: () => {
       console.log('Login Failed')

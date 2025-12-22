@@ -18,7 +18,7 @@ export default function ProfileUserCard({
   uploadLoading,
   handleImageChange,
 }) {
-  console.log('Rendering ProfileUserCard,',user)
+
   return (
     <div>
       <motion.section

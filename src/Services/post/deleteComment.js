@@ -1,6 +1,8 @@
 const BACK_URL = import.meta.env.VITE_BACK_URL
 
-export default async function postDeleteComment(idPots, idComment) {
+export default async function postDeleteComment(idComment,idPots ) {
+
+
   try {
     const response = await fetch(`${BACK_URL}/api/comment/${idPots}/${idComment}`, {
       method: 'DELETE',
