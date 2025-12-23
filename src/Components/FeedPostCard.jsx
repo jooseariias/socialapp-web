@@ -92,6 +92,7 @@ const FeedPostCard = ({ post, onCommentUpdate }) => {
         handleAddComment={handleAddComment}
         isCurrentUserComment={isCurrentUserComment}
         postContent={postContent}
+        handleDeleteClick={handleDeleteClick}
       />
 
       <ModalDeleteComement

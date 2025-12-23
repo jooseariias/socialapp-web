@@ -8,7 +8,7 @@ import { useUserStore } from '../Store/useUserStore'
 
 import ModalDeletePost from './post/ModalDeletePostComment'
 import SelectPostAndLikes from './post/SelectPostAndLikes'
-import PostCard from "./post/PostList"
+import CardPostProfile from './Card/CardPostProfile'
 
 import getPostUser from '../Services/getPostUser'
 import postLike from '../Services/post/postLike'
@@ -48,7 +48,7 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
   useEffect(() => {
     const getPostUserData = async () => {
       const result = await getPostUser()
-
+      console.log('result', result)
       if (result.status >= 400) {
         throw new Error(result.error || 'Error getting posts')
       }
@@ -175,6 +175,7 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
   }
 
   const handleReportPost = postId => {
+    console.log(`Reporting post ${postId}`)
     setPostMenu(null)
     alert(`Post ${postId} reported`)
   }
@@ -408,7 +409,7 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
       {activeTab === 'Posts' && postUser && (
         <div className="space-y-6">
           {postUser.map(post => (
-            <PostCard
+            <CardPostProfile
               key={post._id}
               post={post}
               currentUserId={currentUserId}

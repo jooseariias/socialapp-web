@@ -3,11 +3,11 @@ import {
   FaRegHeart,
   FaHeart,
   FaRegComment,
-  FaEllipsisH,
-  FaRegEnvelope,
   FaBookmark,
   FaRegBookmark,
-  FaTrash,
+  FaTrashAlt,
+  FaShare,
+  FaPaperPlane,
 } from 'react-icons/fa'
 import { IoMdCheckmarkCircle } from 'react-icons/io'
 import { Link } from 'react-router-dom'
@@ -38,7 +38,7 @@ const CardPost = ({
   postUser,
   postLikes,
   handleDeleteClick,
-  post
+  post,
 }) => {
   return (
     <motion.div
@@ -64,10 +64,6 @@ const CardPost = ({
               </p>
             </div>
           </div>
-
-          <button className="text-white/40 hover:text-white">
-            <FaEllipsisH />
-          </button>
         </div>
       </Link>
 
@@ -122,18 +118,10 @@ const CardPost = ({
           Comment
         </button>
 
+        {/* Botón Share reemplazando a FaRegEnvelope */}
         <button className="flex flex-1 items-center justify-center gap-2 text-white/60 hover:text-white">
-          <FaRegEnvelope />
+          <FaShare />
           Share
-        </button>
-
-        <button
-          onClick={() => setBookmarked(!bookmarked)}
-          className={`flex items-center gap-2 px-2 ${
-            bookmarked ? 'text-blue-500' : 'text-white/60 hover:text-white'
-          }`}
-        >
-          {bookmarked ? <FaBookmark /> : <FaRegBookmark />}
         </button>
       </div>
 
@@ -144,7 +132,7 @@ const CardPost = ({
             <img
               src={currentUser.image}
               alt={currentUser.name}
-              className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
+              className="h-10 w-10 flex-shrink-0 rounded-full object-cover border border-white/10"
             />
           )}
           <div className="flex-1">
@@ -152,21 +140,33 @@ const CardPost = ({
               type="text"
               value={comment}
               onChange={e => setComment(e.target.value)}
-              placeholder={currentUser ? 'Write a comment...' : 'Inicia sesión para comentar'}
+              placeholder={currentUser ? 'Write a comment...' : 'Sign in to comment'}
               disabled={commentLoading || !currentUser}
-              className="w-full border-0 bg-transparent px-0 py-2 text-sm text-white placeholder-white/50 focus:ring-0 focus:outline-none disabled:opacity-50"
+              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/40 focus:border-purple-500/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500/20 disabled:opacity-50"
             />
           </div>
+          
+          {/* BOTÓN "PUBLICAR" MEJORADO */}
           <button
             type="submit"
             disabled={!comment.trim() || commentLoading || !currentUser}
-            className={`rounded-lg px-4 py-2 text-sm whitespace-nowrap transition ${
+            className={`relative flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition-all duration-300 ${
               comment.trim() && !commentLoading && currentUser
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90'
-                : 'cursor-not-allowed bg-gradient-to-r from-slate-800/50 to-purple-900/50 text-white/30'
+                ? 'bg-gradient-to-r from-purple-600 via-purple-500 to-purple-500 text-white shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/35 hover:scale-[1.02] active:scale-95'
+                : 'cursor-not-allowed bg-white/5 text-white/30'
             }`}
           >
-            {commentLoading ? '...' : 'Publicar'}
+            {commentLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
+                <span>Commenting...</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <FaPaperPlane className="text-sm" />
+                <span>Comment</span>
+              </div>
+            )}
           </button>
         </form>
       </div>
@@ -183,36 +183,62 @@ const CardPost = ({
             {/* Lista de comentarios */}
             <div className="mt-4 max-h-64 space-y-4 overflow-y-auto pr-2">
               {comments.length === 0 ? (
-                <p className="py-4 text-center text-sm text-white/50">
-                  No hay comentarios aún. ¡Sé el primero!
-                </p>
+                <p className="py-4 text-center text-sm text-white/50">no comments yet</p>
               ) : (
                 comments.map(commentItem => (
-                  <div key={commentItem._id} className="group flex gap-3">
-                    <img src={commentItem.user?.image} className="h-8 w-8 rounded-full" />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-sm font-semibold text-white">
-                          {commentItem.user?.username}
-                        </span>
-                        <span className="text-sm break-words text-white/70">
+                  <div
+                    key={commentItem._id}
+                    className="group flex items-start gap-4 rounded-lg px-2 py-3 transition-all duration-200 hover:bg-white/2"
+                  >
+                    {/* Avatar circular con bordes sutiles */}
+                    <div className="relative shrink-0">
+                      <img
+                        src={commentItem.user?.image}
+                        className="h-9 w-9 rounded-full border border-white/10 object-cover"
+                        alt={`Foto de perfil de ${commentItem.user?.username}`}
+                      />
+                    </div>
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      {/* Contenedor principal del comentario */}
+                      <div className="rounded-2xl rounded-tl-none bg-white/3 px-4 py-3 backdrop-blur-sm">
+                        {/* Nombre de usuario con decoración sutil */}
+                        <div className="mb-1 flex items-center gap-2">
+                          <span className="text-sm font-bold text-white">
+                            {commentItem.user?.username}
+                          </span>
+                          {isCurrentUserComment(commentItem.user?._id) && (
+                            <span className="rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-2 py-0.5 text-xs text-blue-300">
+                              Tú
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Texto del comentario con mejor legibilidad */}
+                        <p className="text-sm leading-relaxed font-light break-words text-white/90">
                           {commentItem.text}
-                        </span>
+                        </p>
                       </div>
 
-                      <div className="mt-1 flex items-center justify-between">
-                        <p className="text-xs text-white/50">{formatDate(commentItem.createdAt)}</p>
+                      {/* Metadatos y acciones - alineados visualmente */}
+                      <div className="mt-2.5 flex items-center gap-5 pl-1">
+                        <span className="text-xs font-medium tracking-wide text-white/50">
+                          {formatDate(commentItem.createdAt)}
+                        </span>
 
-                        {/* BOTÓN DE ELIMINAR - CORREGIDO: usar commentItem.user?._id */}
-                        {isCurrentUserComment(commentItem.user?._id) && (
-                          <button
-                            onClick={() => handleDeleteClick(post._id, commentItem._id)}
-                            className="ml-2 text-white/30 transition-colors hover:text-red-500"
-                            title="Eliminar mi comentario"
-                          >
-                            <FaTrash size={12} />
-                          </button>
-                        )}
+                        {/* Acciones con íconos más modernos */}
+                        <div className="flex items-center gap-3">
+                          {/* Acción de eliminar con animación suave */}
+                          {isCurrentUserComment(commentItem.user?._id) && (
+                            <button
+                              onClick={() => handleDeleteClick(post._id, commentItem._id)}
+                              className="flex items-center gap-1 text-white/40 opacity-20 transition-all duration-300 group-hover:opacity-100 hover:scale-105 hover:text-red-400"
+                              title="Eliminar comentario"
+                            >
+                              <FaTrashAlt size={11} />
+                              <span className="text-xs">Eliminar</span>
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

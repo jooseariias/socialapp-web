@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { FaTimes, FaTrash, FaRegHeart, FaHeart } from 'react-icons/fa'
+import { FaTimes, FaTrashAlt, FaRegHeart, FaHeart, FaPaperPlane } from 'react-icons/fa'
 import { IoMdCheckmarkCircle } from 'react-icons/io'
-
+import { useState } from 'react'
 
 const PostDetailModal = ({
   post,
@@ -18,14 +18,15 @@ const PostDetailModal = ({
   handleAddComment,
   isCurrentUserComment,
   postContent,
+  handleDeleteClick
 }) => {
-
+  const [userActiveP] = useState(false)
 
   return (
     <AnimatePresence>
       {showModal && (
         <>
-          {/* Overlay */}
+          {/* Fondo difuminado */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -34,6 +35,7 @@ const PostDetailModal = ({
             className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md"
           />
 
+          {/* Modal principal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -42,71 +44,119 @@ const PostDetailModal = ({
               onClick={e => e.stopPropagation()}
               className="relative flex h-[95vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800/90 via-purple-900/90 to-slate-800/90"
             >
-              {/* cerrar */}
+              {/* Botón cerrar */}
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 z-20 rounded-full bg-black/40 p-2 text-white/70 hover:text-white"
+                className="absolute top-5 right-5 z-20 rounded-full bg-black/40 p-3 text-white/70 hover:text-white transition-all duration-300 hover:scale-110"
               >
-                <FaTimes size={18} />
+                <FaTimes size={20} />
               </button>
 
-              {/* IZQUIERDA - IMAGEN */}
-              <div className="flex flex-1 items-center justify-center bg-black/40 p-4">
+              {/* Lado izquierdo - Imagen */}
+              <div className="flex flex-1 items-center justify-center bg-black/40 p-6">
                 {postImage && (
                   <img
                     src={postImage}
                     alt="post"
-                    className="max-h-full max-w-full rounded-lg object-contain"
+                    className="max-h-full max-w-full rounded-xl object-contain"
                     onError={e => {
                       e.currentTarget.src =
-                        'https://via.placeholder.com/600x600/020617/8b5cf6?text=Imagen+no+disponible'
+                        'https://via.placeholder.com/600x600/020617/8b5cf6?text=Image+not+available'
                     }}
                   />
                 )}
               </div>
 
-              {/* DERECHA */}
-              <div className="flex w-96 flex-col border-l border-white/10">
-                {/* HEADER */}
-                <div className="flex gap-3 border-b border-white/10 p-5">
-                  <img src={postUser.image} className="h-12 w-12 rounded-full object-cover" />
+              {/* Lado derecho - Contenido */}
+              <div className="flex w-[450px] flex-col border-l border-white/10">
+                {/* Header del usuario */}
+                <div className="flex gap-4 p-6">
+                  <img 
+                    src={postUser.image} 
+                    className="h-14 w-14 rounded-full object-cover border border-white/10"
+                    alt={postUser.name}
+                  />
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white">{postUser.name}</span>
-                      <IoMdCheckmarkCircle className="text-blue-500" />
+                      <span className="font-semibold text-white text-lg">{postUser.name}</span>
+                      {userActiveP && (
+                        <IoMdCheckmarkCircle className="text-blue-500" size={18} />
+                      )}
                     </div>
-                    <p className="text-xs text-white/50">
+                    <p className="text-sm text-white/50">
                       {postUser.username} • {formatDate(post.createdAt)}
                     </p>
                   </div>
                 </div>
 
-                {/* CONTENIDO */}
-                <div className="px-5 py-4 text-sm break-words text-white">{postContent}</div>
+                {/* Contenido del post */}
+                <div className="px-6 py-5 text-sm break-words border-t border-white/10 text-white">
+                  {postContent}
+                </div>
 
-                {/* COMENTARIOS (SCROLL REAL) */}
-                <div className="flex-1 space-y-4 overflow-y-auto px-5 pb-4">
+                {/* Estadísticas */}
+                <div className="flex items-center justify-between px-6 py-4 border-t border-white/10">
+                  <div className="flex items-center gap-2">
+                    {liked ? (
+                      <FaHeart className="text-red-500" size={18} />
+                    ) : (
+                      <FaRegHeart className="text-white/60" size={18} />
+                    )}
+                    <span className="text-sm font-medium text-white ml-1">
+                      {postLikes.length + (liked ? 1 : 0)} likes
+                    </span>
+                  </div>
+                  <span className="text-sm text-white/60">{comments.length} comments</span>
+                </div>
+
+                {/* Sección de comentarios */}
+                <div className="flex-1 space-y-5 overflow-y-auto px-6 py-4">
                   {comments.length === 0 ? (
-                    <p className="text-center text-sm text-white/40">No hay comentarios aún</p>
+                    <div className="flex flex-col items-center justify-center h-full py-10">
+                      <div className="text-white/30 mb-3">
+                        <FaRegHeart size={48} />
+                      </div>
+                      <p className="text-center text-white/50 font-medium">No comments yet</p>
+                      <p className="text-center text-sm text-white/40 mt-1">Be the first to comment</p>
+                    </div>
                   ) : (
                     comments.map(c => (
-                      <div key={c._id} className="group flex gap-3">
-                        <img src={c.user?.image} className="h-8 w-8 rounded-full object-cover" />
-                        <div className="flex-1">
-                          <p className="text-sm text-white">
-                            <b>{c.user?.username}</b>{' '}
-                            <span className="text-white/70">{c.text}</span>
-                          </p>
-                          <div className="mt-1 flex items-center justify-between">
+                      <div 
+                        key={c._id} 
+                        className="group flex gap-4 p-3 rounded-xl hover:bg-white/5 transition-all duration-200"
+                      >
+                        <div className="relative shrink-0">
+                          <img 
+                            src={c.user?.image} 
+                            className="h-10 w-10 rounded-full object-cover border border-white/10"
+                            alt={c.user?.username}
+                          />
+                          
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-white text-sm">{c.user?.username}</span>
+                            {isCurrentUserComment(c.user?._id) && (
+                              <span className="text-xs bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 px-2 py-0.5 rounded-full">
+                                You
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-white/90 text-sm leading-relaxed mb-2">{c.text}</p>
+                          
+                          <div className="flex items-center justify-between">
                             <span className="text-xs text-white/40">{formatDate(c.createdAt)}</span>
-                            {isCurrentUserComment(c.user?._id) &&
-                              !(
-                                <FaTrash
-                                  onClick={() => handleDeleteClick(post._id, c._id)}
-                                  className="cursor-pointer text-white/40 hover:text-red-500"
-                                  size={12}
-                                />
-                              )}
+                            
+                            {/* Botón eliminar */}
+                            {isCurrentUserComment(c.user?._id) && (
+                              <button
+                                onClick={() => handleDeleteClick(post._id, c._id)}
+                                className="flex items-center gap-1.5 text-xs text-white/40 hover:text-red-400 transition-colors"
+                              >
+                                <FaTrashAlt size={11} />
+                                <span>Delete</span>
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -114,25 +164,26 @@ const PostDetailModal = ({
                   )}
                 </div>
 
-                {/* ACCIONES + INPUT */}
-                <div className="border-t border-white/10 p-5">
-                  <div className="mb-3 flex justify-between text-sm text-white/60">
-                    <span>{postLikes.length + (liked ? 1 : 0)} likes</span>
-                    <span>{comments.length} comments</span>
-                  </div>
-
-                  <form onSubmit={handleAddComment} className="flex gap-2">
+                {/* Input de comentario */}
+                <div className="border-t border-white/10 p-6">
+                  <form onSubmit={handleAddComment} className="flex gap-3">
                     <input
                       value={comment}
                       onChange={e => setComment(e.target.value)}
-                      placeholder="Añade un comentario..."
-                      className="flex-1 rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none"
+                      placeholder="Write a comment..."
+                      className="flex-1 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-white placeholder-white/40 focus:border-purple-500/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-300"
                     />
                     <button
+                      type="submit"
                       disabled={!comment.trim()}
-                      className="rounded-lg bg-blue-600 px-4 text-white disabled:opacity-40"
+                      className={`relative flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition-all duration-300 ${
+                        comment.trim()
+                          ? 'bg-gradient-to-r from-purple-600 via-purple-500 to-purple-500 text-white shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/35 hover:scale-[1.02] active:scale-95'
+                          : 'cursor-not-allowed bg-white/5 text-white/30'
+                      }`}
                     >
-                      Publicar
+                      <FaPaperPlane className="text-sm" />
+                      <span>Post</span>
                     </button>
                   </form>
                 </div>
