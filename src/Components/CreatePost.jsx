@@ -6,16 +6,16 @@ import { useUserStore } from '../Store/useUserStore'
 import createPost from '../Services/postCont'
 
 const CreatePost = ({ isOpen, onClose, onPostCreated }) => {
+  
   const { user } = useUserStore()
 
   const [content, setContent] = useState('')
-
   const [image, setImage] = useState(null)
-
   const [imagePreview, setImagePreview] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [showContentWarning, setShowContentWarning] = useState(false)
 
   const fileInputRef = useRef(null)
   const textareaRef = useRef(null)
@@ -46,12 +46,12 @@ const CreatePost = ({ isOpen, onClose, onPostCreated }) => {
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      setError('Selecciona una imagen válida')
+      setError('Select a valid image')
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError('La imagen debe ser menor a 5MB')
+      setError('The image must be smaller than 5MB')
       return
     }
 
@@ -71,17 +71,48 @@ const CreatePost = ({ isOpen, onClose, onPostCreated }) => {
 
   const triggerFileInput = () => fileInputRef.current?.click()
 
+  const validatePost = () => {
+    if (!content.trim() && image) {
+      setShowContentWarning(true)
+      return false
+    }
+    return true
+  }
+
+  const handleCancel = () => {
+    // Limpiar todo el contenido
+    setContent('')
+    setImage(null)
+    setImagePreview(null)
+    setError('')
+    setShowContentWarning(false)
+    setShowEmojiPicker(false)
+    
+    // Limpiar el input de archivo
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    
+    // Cerrar el modal
+    onClose()
+  }
+
   const handleSubmit = async e => {
     e.preventDefault()
 
+    // Validar que no sea solo imagen sin contenido
     if (!content.trim() && !image) {
-      setError('Agrega contenido o una imagen para crear el post')
+      setError('Add content or an image to create the post')
+      return
+    }
+
+    // Validación específica para imagen sin contenido
+    if (!validatePost()) {
       return
     }
 
     try {
       setLoading(true)
       setError('')
+      setShowContentWarning(false)
 
       // Llamada al servicio
       const result = await createPost(content, image)
@@ -105,6 +136,14 @@ const CreatePost = ({ isOpen, onClose, onPostCreated }) => {
       setError(err.message || 'Error al crear el post')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleContentChange = (e) => {
+    setContent(e.target.value)
+    // Ocultar advertencia si el usuario empieza a escribir
+    if (e.target.value.trim() && showContentWarning) {
+      setShowContentWarning(false)
     }
   }
 
@@ -156,11 +195,34 @@ const CreatePost = ({ isOpen, onClose, onPostCreated }) => {
             </div>
           )}
 
+          {showContentWarning && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4"
+            >
+              <div className="flex items-center gap-2">
+                <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <p className="text-sm text-yellow-300">
+                  Please add a description for your image. Share what you think about it.
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {error && !showContentWarning && (
+            <div className="mb-4 rounded-lg border border-red-500/50 bg-red-500/10 p-4">
+              <p className="text-sm text-red-300">{error}</p>
+            </div>
+          )}
+
           <textarea
             ref={textareaRef}
             value={content}
-            onChange={e => setContent(e.target.value)}
-            placeholder="¿Qué estás pensando?"
+            onChange={handleContentChange}
+            placeholder="What are you thinking?"
             className="custom-scroll mt-4 w-full resize-none overflow-y-auto bg-transparent text-lg text-white placeholder-white/60 outline-none"
             rows="4"
           />
@@ -178,7 +240,7 @@ const CreatePost = ({ isOpen, onClose, onPostCreated }) => {
             </div>
           )}
 
-          <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-6">
+          <div className="mt-6 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -186,9 +248,8 @@ const CreatePost = ({ isOpen, onClose, onPostCreated }) => {
                 className="flex items-center gap-2 rounded-lg p-3 text-purple-400 hover:bg-white/10 hover:text-purple-300"
               >
                 <FaImage size={20} />
-                <span className="hidden sm:block">Foto</span>
+                <span className="hidden sm:block">Image</span>
               </button>
-
               <input
                 type="file"
                 ref={fileInputRef}
@@ -207,26 +268,42 @@ const CreatePost = ({ isOpen, onClose, onPostCreated }) => {
               </div>
             </div>
 
-            <motion.button
-              type="submit"
-              disabled={loading || (!content.trim() && !image)}
-              whileHover={{ scale: loading ? 1 : 1.02 }}
-              whileTap={{ scale: loading ? 1 : 0.98 }}
-              className={`flex items-center gap-2 rounded-xl px-6 py-3 font-semibold text-white ${
-                !content.trim() && !image
-                  ? 'cursor-not-allowed bg-gray-500'
-                  : 'bg-gradient-to-r from-purple-500 to-fuchsia-600'
-              } `}
-            >
-              {loading ? (
-                'Publicando...'
-              ) : (
-                <>
-                  <FaPaperPlane size={16} />
-                  Publicar
-                </>
-              )}
-            </motion.button>
+            <div className="flex items-center gap-3">
+              <motion.button
+                type="button"
+                onClick={handleCancel}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 rounded-xl border border-gray-500/50 px-6 py-3 font-semibold text-gray-300 hover:bg-gray-800/50 hover:text-white"
+              >
+                <FaTimes size={14} />
+                Cancel
+              </motion.button>
+
+              <motion.button
+                type="submit"
+                disabled={loading || (!content.trim() && !image)}
+                whileHover={{ scale: loading || (!content.trim() && !image) ? 1 : 1.02 }}
+                whileTap={{ scale: loading || (!content.trim() && !image) ? 1 : 0.98 }}
+                className={`flex items-center gap-2 rounded-xl px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 ${
+                  !content.trim() && !image
+                    ? 'cursor-not-allowed bg-gray-700'
+                    : 'bg-gradient-to-r from-purple-500 via-purple-600 to-fuchsia-600 hover:from-purple-600 hover:via-purple-700 hover:to-fuchsia-700 active:scale-[0.98]'
+                } ${showContentWarning ? 'animate-pulse border-2 border-yellow-500' : ''}`}
+              >
+                {loading ? (
+                  <>
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    Posting...
+                  </>
+                ) : (
+                  <>
+                    <FaPaperPlane size={16} />
+                    Post
+                  </>
+                )}
+              </motion.button>
+            </div>
           </div>
         </form>
       </motion.div>
