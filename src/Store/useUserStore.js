@@ -2,56 +2,60 @@ import { create } from 'zustand'
 const BACK_URL = import.meta.env.VITE_BACK_URL
 
 export const useUserStore = create((set, get) => ({
-user: null,
-loading: true,
-isActive: false,
+  user: null,
+  loading: true,
+  isActive: false,
 
+  setSession :({user ,token})=>{
+    set({
+      user,
+      token,
+    })
+  },
 
   // Función para obtener el perfil del servidor
- fetchUser: async () => {
-    set({ loading: true }); // Asegura que los componentes vean que estamos buscando datos
+  fetchUser: async () => {
+    set({ loading: true }) // Asegura que los componentes vean que estamos buscando datos
     try {
       const res = await fetch(`${BACK_URL}/api/GetUserProfile`, {
         method: 'GET',
         credentials: 'include',
-      });
+      })
 
-   if (!res.ok) {
-  set({ loading: false })
-  return
-}
+      if (!res.ok) {
+        set({ loading: false })
+        return
+      }
 
-
-
-      const resData = await res.json();
-      const userData = resData?.data || resData;
+      const resData = await res.json()
+      const userData = resData?.data || resData
 
       // ACTUALIZACIÓN ATÓMICA
-   set({
-  user: userData,
-  loading: false,
-  isActive: true
-})
-
-
+      set({
+        user: userData,
+        loading: false,
+        isActive: true,
+      })
     } catch (err) {
-      console.error("Error en fetchUser:", err);
-      set({ user: null, loading: false, isActive: false });
+      console.error('Error en fetchUser:', err)
+      set({ user: null, loading: false, isActive: false })
     }
   },
 
   // Para guardar el usuario manualmente (ej: desde el Login)
-  setUser: (user) => set({ 
-    user: user || null, 
-    isActive: !!user, 
-    loading: false 
-  }),
+  setUser: user =>
+    set({
+      user: user || null,
+      isActive: !!user,
+      loading: false,
+    }),
 
   // Para activar el estado de autenticación
-  setIsActive: (value) => set({ 
-    isActive: value, 
-    loading: false 
-  }),
+  setIsActive: value =>
+    set({
+      isActive: value,
+      loading: false,
+    }),
 
   // Actualización local (UI inmediata)
   updateUserLocal: updatedFields =>
@@ -68,14 +72,14 @@ isActive: false,
         credentials: 'include',
       })
       if (!response.ok) throw new Error('Error al actualizar')
-      
+
       const result = await response.json()
       const newUserBody = result.user || result.data || result
 
       if (newUserBody) {
         set(state => ({
           user: state.user ? { ...state.user, ...newUserBody } : newUserBody,
-          isActive: true
+          isActive: true,
         }))
       }
       return result
@@ -93,16 +97,16 @@ isActive: false,
       await fetch(`${BACK_URL}/api/Logout`, {
         method: 'POST', // Asegúrate de que coincida con tu router
         credentials: 'include', // REQUERIDO para enviar/recibir cookies
-      });
+      })
     } catch (err) {
-      console.error("Error al contactar con el servidor para logout:", err);
+      console.error('Error al contactar con el servidor para logout:', err)
     } finally {
       // Limpiamos el estado local pase lo que pase en el servidor
-      set({ 
-        user: null, 
-        isActive: false, 
-        loading: false 
-      });
+      set({
+        user: null,
+        isActive: false,
+        loading: false,
+      })
     }
   },
 }))

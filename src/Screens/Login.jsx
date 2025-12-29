@@ -22,7 +22,7 @@ export default function Login() {
   const navigate = useNavigate()
   const setIsActive = useUserStore(state => state.setIsActive)
   const fetchUser = useUserStore(state => state.fetchUser)
-
+  const setSession = useUserStore(state => state.setSession)
 
  const onSubmit = async data => {
   setLoading(true)
@@ -34,10 +34,13 @@ export default function Login() {
 
     if (result.status === 200) {
       // ⬇️ ESPERAMOS a que el backend devuelva el usuario con cookie
-      await fetchUser()
+      setSession({
+        user: result.user,
+        token: result.token,
+      })
 
       // ⬇️ recién ahora navegamos
-      navigate('/Feed', { replace: true })
+      navigate('/Feed')
     } else {
       setBackendError(result.message || result.error || 'Error desconocido')
     }
