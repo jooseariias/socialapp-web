@@ -40,6 +40,7 @@ const FeedPostCard = ({ post, onCommentUpdate }) => {
   } = usePostActions(post, onCommentUpdate)
   return (
     <>
+    
       <CardPost
         expanded={expanded}
         setExpanded={setExpanded}
