@@ -1,15 +1,22 @@
 // En Services/post/putPost.js
 const BACK_URL = import.meta.env.VITE_BACK_URL
 
+import { useUserStore } from '../../Store/useUserStore'
+
 export default async function putPost(id, data) {
+  const token = useUserStore.getState().token
+  if (!token) {
+    return { status: 401, error: 'No token disponible' }
+  }
   try {
     const response = await fetch(`${BACK_URL}/api/posts/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
       },
-      credentials: 'include',
+     
       body: JSON.stringify(data),
     })
 

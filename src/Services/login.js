@@ -9,7 +9,7 @@ export default async function login(email, password) {
         Accept: 'application/json',
       },
       body: JSON.stringify({ email, password }),
-      credentials: 'include',
+    
     })
 
     const data = await response.json()

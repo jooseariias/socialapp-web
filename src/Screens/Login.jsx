@@ -7,6 +7,7 @@ import Google from '../Utils/Auth'
 import login from '../Services/login'
 import { useNavigate } from 'react-router-dom'
 import { useUserStore } from '../Store/useUserStore'
+import {Link} from 'react-router-dom'
 
 export default function Login() {
   const {
@@ -20,29 +21,38 @@ export default function Login() {
   const [backendMessage, setBackendMessage] = useState(null)
   const [backendError, setBackendError] = useState(null)
   const navigate = useNavigate()
-  const setIsActive = useUserStore(state => state.setIsActive)
+  const { setSession, fetchUser  ,setIsActive} = useUserStore()
 
+  const onSubmit = async (data) => {
+  setLoading(true)
+  setBackendMessage(null)
+  setBackendError(null)
 
-  const onSubmit = async data => {
-    setLoading(true)
-    setBackendMessage(null)
-    setBackendError(null)
+  try {
+    const result = await login(data.email, data.password) // {status, token, user}
 
-    try {
-      const result = await login(data.email, data.password)
+    if (result.status === 200) {
+      // Guardamos usuario y token en estado
+      console.log('result', result)
+      setSession({ user: result?.data?.user, token: result?.data?.token })
 
-      if (result.status === 200) {
-        setIsActive(true)
-        setBackendMessage(result.message)
-      } else {
-        setBackendError(result.message || result.error || 'Error desconocido')
-      }
-    } catch (error) {
-      console.error(error)
-      setLoading(false)
-      setBackendError('error al loguear el usuario. intenta nuevamente.')
+      // Ahora fetchUser asegura que el estado de user y isActive se actualice correctamente
+       const data=  await fetchUser()
+      console.log('data', data)
+      // Navegamos cuando todo esté listo
+      navigate('/Feed', { replace: true })
+      setBackendMessage(result.message)
+    } else {
+      setBackendError(result.message || result.error || 'Error desconocido')
     }
+  } catch (error) {
+    console.error(error)
+    setBackendError('Error al loguear el usuario. Intenta nuevamente.')
+  } finally {
+    setLoading(false)
   }
+}
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -184,12 +194,9 @@ export default function Login() {
           >
             <p className="text-gray-600 dark:text-gray-400">
               Don’t have an account?{' '}
-              <a
-                href="#"
-                className="text-button font-bold transition-all hover:tracking-wide hover:underline hover:underline-offset-4 hover:opacity-80"
-              >
+              <Link to='/Register' className="text-button font-bold transition-all hover:tracking-wide hover:underline hover:underline-offset-4 hover:opacity-80">
                 Sign Up
-              </a>
+             </Link>
             </p>
           </motion.div>
         </motion.div>

@@ -1,7 +1,11 @@
 const BACK_URL = import.meta.env.VITE_BACK_URL
+import { useUserStore } from '../../Store/useUserStore'
 
 export default async function postCreateComment(id, text) {
-
+  const token = useUserStore.getState().token
+  if (!token) {
+    return { status: 401, error: 'No token disponible' }
+  }
 
   try {
     const response = await fetch(`${BACK_URL}/api/comment/${id}`, {
@@ -9,9 +13,10 @@ export default async function postCreateComment(id, text) {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ text }),
-      credentials: 'include',
+      
     })
 
     return response.json()

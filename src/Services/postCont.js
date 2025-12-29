@@ -1,6 +1,11 @@
 const BACK_URL = import.meta.env.VITE_BACK_URL
+import { useUserStore } from '../Store/useUserStore'
 
 export default async function createPost(Content, Image) {
+  const token = useUserStore.getState().token
+  if (!token) {
+    return { status: 401, error: 'No token disponible' }
+  }
   try {
     const formData = new FormData()
 
@@ -10,7 +15,10 @@ export default async function createPost(Content, Image) {
     const response = await fetch(`${BACK_URL}/api/CreatePost`, {
       method: 'POST',
       body: formData,
-      credentials: 'include',
+      headers: {
+     
+        Authorization: `Bearer ${token}`,
+      },
     })
 
     const data = await response.json()
