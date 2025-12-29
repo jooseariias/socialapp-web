@@ -2,9 +2,10 @@ import { create } from 'zustand'
 const BACK_URL = import.meta.env.VITE_BACK_URL
 
 export const useUserStore = create((set, get) => ({
-  user: null,
-  loading: true,
-  isActive: false,
+user: null,
+loading: true,
+isActive: false,
+
 
   // Función para obtener el perfil del servidor
  fetchUser: async () => {
@@ -15,21 +16,23 @@ export const useUserStore = create((set, get) => ({
         credentials: 'include',
       });
 
-     if (!res.ok) {
-  set({ user: null, loading: false })
+   if (!res.ok) {
+  set({ loading: false })
   return
 }
+
 
 
       const resData = await res.json();
       const userData = resData?.data || resData;
 
       // ACTUALIZACIÓN ATÓMICA
-      set({
+   set({
   user: userData,
   loading: false,
   isActive: true
 })
+
 
     } catch (err) {
       console.error("Error en fetchUser:", err);
