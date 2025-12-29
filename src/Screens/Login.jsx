@@ -21,28 +21,34 @@ export default function Login() {
   const [backendError, setBackendError] = useState(null)
   const navigate = useNavigate()
   const setIsActive = useUserStore(state => state.setIsActive)
+  const fetchUser = useUserStore(state => state.fetchUser)
 
 
-  const onSubmit = async data => {
-    setLoading(true)
-    setBackendMessage(null)
-    setBackendError(null)
+ const onSubmit = async data => {
+  setLoading(true)
+  setBackendMessage(null)
+  setBackendError(null)
 
-    try {
-      const result = await login(data.email, data.password)
+  try {
+    const result = await login(data.email, data.password)
 
-      if (result.status === 200) {
-        setIsActive(true)
-        setBackendMessage(result.message)
-      } else {
-        setBackendError(result.message || result.error || 'Error desconocido')
-      }
-    } catch (error) {
-      console.error(error)
-      setLoading(false)
-      setBackendError('error al loguear el usuario. intenta nuevamente.')
+    if (result.status === 200) {
+      // ⬇️ ESPERAMOS a que el backend devuelva el usuario con cookie
+      await fetchUser()
+
+      // ⬇️ recién ahora navegamos
+      navigate('/Feed', { replace: true })
+    } else {
+      setBackendError(result.message || result.error || 'Error desconocido')
     }
+  } catch (error) {
+    console.error(error)
+    setBackendError('Error al loguear. Intentá nuevamente.')
+  } finally {
+    setLoading(false)
   }
+}
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
