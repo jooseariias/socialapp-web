@@ -5,6 +5,7 @@ export const useUserStore = create((set, get) => ({
   user: null,
   loading: true,
   isActive: false,
+  token: null,
 
   setSession :({user ,token})=>{
     set({
@@ -19,7 +20,8 @@ export const useUserStore = create((set, get) => ({
     try {
       const res = await fetch(`${BACK_URL}/api/GetUserProfile`, {
         method: 'GET',
-        credentials: 'include',
+        headers: {
+         Authorization: `Bearer ${token}`,}
       })
 
       if (!res.ok) {
