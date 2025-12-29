@@ -15,20 +15,22 @@ export const useUserStore = create((set, get) => ({
         credentials: 'include',
       });
 
-      if (!res.ok) {
-        set({ user: null, loading: false, isActive: false });
-        return;
-      }
+     if (!res.ok) {
+  set({ user: null, loading: false })
+  return
+}
+
 
       const resData = await res.json();
       const userData = resData?.data || resData;
 
       // ACTUALIZACIÓN ATÓMICA
-      set({ 
-        user: userData, 
-        loading: false, 
-        isActive: true 
-      });
+      set({
+  user: userData,
+  loading: false,
+  isActive: true
+})
+
     } catch (err) {
       console.error("Error en fetchUser:", err);
       set({ user: null, loading: false, isActive: false });

@@ -12,7 +12,8 @@ export default function ProtectedRoute({ children }) {
     )
   }
 
-  if (!isActive && !user) {
+  // 🔑 SOLO cuando loading terminó
+  if (!isActive || !user) {
     return <Navigate to="/" replace />
   }
 
