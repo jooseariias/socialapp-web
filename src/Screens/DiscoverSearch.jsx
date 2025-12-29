@@ -17,6 +17,7 @@ import {
 import { IoMdCheckmarkCircle } from 'react-icons/io'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Header from '../Components/Header'
+const BACK_URL = import.meta.env.VITE_BACK_URL
 
 const DiscoverPage = () => {
   const [activeFilter, setActiveFilter] = useState('all')
@@ -66,7 +67,7 @@ const DiscoverPage = () => {
   const loadDiscoverData = useCallback(async (pageNum = 1, reset = false) => {
     setLoading(true)
     try {
-      const response = await fetch(`http://localhost:8000/api/discover?page=${pageNum}&limit=${limit}`)
+      const response = await fetch(`${BACK_URL}/api/discover?page=${pageNum}&limit=${limit}`)
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -117,7 +118,7 @@ const DiscoverPage = () => {
     setLoading(true)
     try {
       const response = await fetch(
-        `http://localhost:8000/api//search?q=${encodeURIComponent(query)}&type=${type}&page=${pageNum}&limit=${limit}`
+        `${BACK_URL}/api/search?q=${encodeURIComponent(query)}&type=${type}&page=${pageNum}&limit=${limit}`
       )
       
       if (!response.ok) {
