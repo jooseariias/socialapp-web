@@ -4,7 +4,6 @@ import { Navigate } from 'react-router-dom'
 export default function ProtectedRoute({ children }) {
   const { user, loading } = useUserStore()
 
-  // 1️⃣ Mientras se resuelve la sesión, NO decidir nada
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#2b0a3d]">
@@ -13,7 +12,6 @@ export default function ProtectedRoute({ children }) {
     )
   }
 
-  // 2️⃣ Solo cuando terminó el loading
   if (!user) {
     return <Navigate to="/" replace />
   }

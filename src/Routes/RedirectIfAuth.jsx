@@ -2,13 +2,15 @@ import { Navigate } from 'react-router-dom'
 import { useUserStore } from '../Store/useUserStore'
 
 export default function RedirectIfAuth({ children }) {
-  const { user, loading, isActive } = useUserStore()
+  const { user, loading } = useUserStore()
 
-  // Si App.jsx está haciendo el fetchUser inicial, no hacemos nada
-  if (loading) return null
+  // 🔑 Mientras carga, MOSTRAMOS el contenido
+  if (loading) {
+    return children
+  }
 
-  // Si ya detectamos sesión, mandamos al feed de una vez
-  if (isActive || user) {
+  // Si hay sesión, redirigir
+  if (user) {
     return <Navigate to="/Feed" replace />
   }
 
