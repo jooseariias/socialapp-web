@@ -1,19 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  HiOutlineHome, 
-  HiOutlineSearch, 
-  HiOutlineBell, 
-  HiOutlinePlusSm, 
-  HiOutlineUser, 
-  HiOutlineCog, 
-  HiOutlineLogout,
-  HiMenu,
-  HiX
-} from 'react-icons/hi' 
-import { FaUsers } from 'react-icons/fa'
+import { HiOutlineHome, HiOutlineSearch, HiOutlineBell, HiOutlinePlusSm, HiOutlineUser, HiOutlineCog, HiOutlineLogout, HiMenu, HiX } from 'react-icons/hi' 
 import { useUserStore } from '../Store/useUserStore'
 import CreatePost from './CreatePost'
+import { FaUsers } from 'react-icons/fa'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 const Header = () => {
@@ -21,29 +11,12 @@ const Header = () => {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showCreatePost, setShowCreatePost] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
   
   const { user, logout } = useUserStore()
   const location = useLocation()
   const navigate = useNavigate()
 
   const springTransition = { type: "spring", stiffness: 300, damping: 25 }
-
-  // Efecto para detectar scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  // Cerrar menús al cambiar de ruta
-  useEffect(() => {
-    setShowMobileMenu(false)
-    setShowNotifications(false)
-    setShowUserMenu(false)
-  }, [location.pathname])
 
   const handleLogout = () => {
     logout()
@@ -55,171 +28,120 @@ const Header = () => {
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-        className={`sticky top-0 z-50 border-b ${
-          isScrolled 
-            ? 'border-white/10 bg-[#2b0a3d]/90' 
-            : 'border-white/[0.06] bg-[#2b0a3d]/70'
-        } px-4 sm:px-6 py-3 backdrop-blur-xl transition-all duration-300`}
+        className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#2b0a3d]/70 px-4 py-3 backdrop-blur-xl"
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           
-          {/* Logo */}
+          {/* Logo - Siempre visible */}
           <Link to="/Feed">
-            <motion.div 
-              whileHover={{ scale: 1.05 }} 
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2"
-            >
-              <div className="relative">
-                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
-                  <span className="text-white font-black text-sm sm:text-base">N</span>
-                </div>
-                <div className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 border-2 border-[#2b0a3d]"></div>
-              </div>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tighter text-white hidden sm:block">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <h1 className="text-xl sm:text-2xl font-black tracking-tighter text-white">
                 NEV<span className="text-purple-400">RYA</span>
-              </h1>
-              <h1 className="text-xl font-black tracking-tighter text-white sm:hidden">
-                N<span className="text-purple-400">R</span>
               </h1>
             </motion.div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-2 lg:gap-4">
-            {/* Navigation Links */}
-            <nav className="flex items-center space-x-1 lg:space-x-2">
-              <HeaderLink 
-                to="/Feed" 
-                icon={<HiOutlineHome size={20} />} 
-                label="Home" 
-                active={location.pathname === '/Feed'} 
-              />
-              <HeaderLink 
-                to="/Discover" 
-                icon={<HiOutlineSearch size={20} />} 
-                label="Explore" 
-                active={location.pathname === '/Discover'} 
-              />
-              <HeaderLink 
-                to="/Community" 
-                icon={<FaUsers size={18} />} 
-                label="Community" 
-                active={location.pathname === '/Community'} 
-              />
+          <div className="hidden md:flex items-center gap-1 sm:gap-2">
+            
+            <nav className="flex items-center mr-2 space-x-1">
+              <HeaderLink to="/Feed" icon={<HiOutlineHome size={20} />} label="Home" active={location.pathname === '/Feed'} />
+              <HeaderLink to="/Discover" icon={<HiOutlineSearch size={20} />} label="Explore" active={location.pathname === '/Discover'} />
             </nav>
 
-            {/* Divider */}
             <div className="h-6 w-px bg-white/10 mx-2" />
 
-            {/* Create Post Button */}
             <motion.button
-              whileHover={{ scale: 1.05, backgroundColor: "#9333ea" }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02, backgroundColor: "#9333ea" }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setShowCreatePost(true)}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 px-4 lg:px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-purple-900/20 hover:shadow-purple-900/30 transition-all"
+              className="flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-purple-900/20 transition-all mr-2"
             >
               <HiOutlinePlusSm size={18} />
-              <span className="hidden lg:inline">Create Post</span>
-              <span className="lg:hidden">Create</span>
+              <span>Create Post</span>
             </motion.button>
 
-            {/* Notifications */}
-            <div className="relative">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => { 
-                  setShowNotifications(!showNotifications)
-                  setShowUserMenu(false)
-                }}
-                className={`relative rounded-xl p-2 transition-all ${
-                  showNotifications 
-                    ? 'text-white bg-white/10' 
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <HiOutlineBell size={22} />
-                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_8px_#a855f7]" />
-              </motion.button>
+            {/* --- CÁPSULA DE ESTADOS --- */}
+            <div className="flex items-center bg-white/5 rounded-2xl px-1">
+              
+              {/* NUEVO ICONO: Radar / Conexión de Seguidores */}
+              <Link to="/Community">
+                <motion.button
+                  whileHover={{ scale: 1.1, color: "#60a5fa" }}
+                  whileTap={{ scale: 0.9 }}
+                  className="relative rounded-xl p-2.5 text-white/70 transition-all"
+                  title="Comunidad"
+                >
+                  <FaUsers size={20} />
+                  {user?.followers?.length > 0 && (
+                    <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_#60a5fa]" />
+                  )}
+                </motion.button>
+              </Link>
 
-              <AnimatePresence>
-                {showNotifications && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                    transition={springTransition}
-                    className="absolute right-0 mt-3 w-72 sm:w-80 overflow-hidden rounded-2xl border border-white/10 bg-[#1a0826]/95 p-1 shadow-2xl backdrop-blur-2xl"
-                  >
-                    <div className="p-3 text-xs font-bold uppercase tracking-widest text-white/40 border-b border-white/5 flex items-center justify-between">
-                      <span>Notifications</span>
-                      <span className="text-xs text-purple-400">3 new</span>
-                    </div>
-                    <div className="max-h-80 overflow-y-auto">
-                      <div className="p-4 text-center text-sm text-white/40">
-                        <HiOutlineBell className="mx-auto mb-2 h-8 w-8" />
-                        <p>No notifications yet</p>
-                        <p className="text-xs mt-1">We'll notify you here</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Notificaciones */}
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => { setShowNotifications(!showNotifications); setShowUserMenu(false); }}
+                  className={`relative rounded-xl p-2.5 transition-all ${showNotifications ? 'text-white' : 'text-white/70 hover:text-white'}`}
+                >
+                  <HiOutlineBell size={20} />
+                  <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
+                </motion.button>
+
+                <AnimatePresence>
+                  {showNotifications && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                      transition={springTransition}
+                      className="absolute right-0 mt-4 w-80 overflow-hidden rounded-2xl border border-white/10 bg-[#1a0826]/95 p-1 shadow-2xl backdrop-blur-2xl"
+                    >
+                      <div className="p-4 text-xs font-bold uppercase tracking-widest text-white/40 border-b border-white/5">Notificaciones</div>
+                      <div className="max-h-80 overflow-y-auto px-2 py-8 text-center text-sm text-white/30 italic">Sin novedades</div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Profile Menu */}
-            <div className="relative">
+            <div className="relative ml-2">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => { 
-                  setShowUserMenu(!showUserMenu)
-                  setShowNotifications(false)
-                }}
-                className="flex items-center gap-2 rounded-full border-2 border-transparent hover:border-purple-500/30 transition-all p-0.5"
+                onClick={() => { setShowUserMenu(!showUserMenu); setShowNotifications(false); }}
+                className="flex items-center rounded-full border-2 border-transparent hover:border-purple-500/50 transition-all"
               >
-                <div className="relative">
-                  <img
-                    src={user?.image || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}
-                    alt="Perfil"
-                    className="h-8 w-8 rounded-full object-cover ring-2 ring-purple-500/20"
-                    onError={(e) => {
-                      e.target.src = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
-                    }}
-                  />
-                  <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-[#2b0a3d]"></div>
-                </div>
-                <span className="text-sm font-medium text-white/80 hidden lg:inline">
-                  {user?.name?.split(' ')[0] || 'User'}
-                </span>
+                <img
+                  src={user?.image || 'https://via.placeholder.com/150'}
+                  alt="Perfil"
+                  className="h-8 w-8 rounded-full object-cover bg-purple-900/50"
+                />
               </motion.button>
 
               <AnimatePresence>
                 {showUserMenu && (
                   <motion.div
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                    initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: 15, scale: 0.95 }}
                     transition={springTransition}
-                    className="absolute right-0 mt-3 w-56 sm:w-60 overflow-hidden rounded-2xl border border-white/10 bg-[#1a0826]/95 p-2 shadow-2xl backdrop-blur-2xl"
+                    className="absolute right-0 mt-4 w-60 overflow-hidden rounded-2xl border border-white/10 bg-[#1a0826]/95 p-2 shadow-2xl backdrop-blur-2xl"
                   >
-                    <div className="px-3 py-3 border-b border-white/5">
+                    <div className="px-4 py-3 border-b border-white/5">
                       <p className="truncate text-sm font-bold text-white">{user?.name || 'Usuario'}</p>
                       <p className="truncate text-xs text-white/40">@{user?.username || 'user'}</p>
                     </div>
                     <div className="p-1 space-y-1">
-                      <MenuLink to="/ProfileUser" icon={<HiOutlineUser size={18}/>} label="My Profile" />
-                      <MenuLink to="/Config" icon={<HiOutlineCog size={18}/>} label="Settings" />
-                      <motion.button 
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleLogout}
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
-                      >
-                        <HiOutlineLogout size={18} /> 
-                        <span>Sign Out</span>
-                      </motion.button>
+                      <MenuLink to="/ProfileUser" icon={<HiOutlineUser size={18}/>} label="Mi Perfil" />
+                      <MenuLink to="/Comfig" icon={<HiOutlineCog size={18}/>} label="Ajustes" />
+                      <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors">
+                        <HiOutlineLogout size={18} /> <span>Cerrar Sesión</span>
+                      </button>
                     </div>
                   </motion.div>
                 )}
@@ -229,108 +151,108 @@ const Header = () => {
 
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-2 md:hidden">
+            {/* Create Post Button Mobile */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowCreatePost(true)}
+              className="flex items-center gap-1 rounded-xl bg-purple-600 px-3 py-2 text-xs font-bold text-white shadow-lg shadow-purple-900/20"
+            >
+              <HiOutlinePlusSm size={16} />
+              <span>Post</span>
+            </motion.button>
+
+            {/* Notifications Mobile */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => setShowCreatePost(true)}
-              className="flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-purple-500 p-2.5 text-white shadow-lg shadow-purple-900/20"
+              onClick={() => { setShowNotifications(!showNotifications); setShowUserMenu(false); }}
+              className="relative rounded-xl p-2 text-white/70 hover:text-white transition-all"
             >
-              <HiOutlinePlusSm size={20} />
+              <HiOutlineBell size={20} />
+              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-purple-500" />
             </motion.button>
 
+            {/* Community Mobile */}
+            <Link to="/Community">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="relative rounded-xl p-2 text-white/70 hover:text-white transition-all"
+              >
+                <FaUsers size={18} />
+              </motion.button>
+            </Link>
+
+            {/* Profile Mobile */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => { setShowUserMenu(!showUserMenu); setShowNotifications(false); }}
+              className="flex items-center rounded-full border-2 border-transparent hover:border-purple-500/50 transition-all"
+            >
+              <img
+                src={user?.image || 'https://via.placeholder.com/150'}
+                alt="Perfil"
+                className="h-8 w-8 rounded-full object-cover bg-purple-900/50"
+              />
+            </motion.button>
+
+            {/* Mobile Menu Toggle */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="rounded-xl p-2 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+              className="rounded-xl p-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
             >
-              {showMobileMenu ? <HiX size={24} /> : <HiMenu size={24} />}
+              {showMobileMenu ? <HiX size={20} /> : <HiMenu size={20} />}
             </motion.button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Dropdown */}
         <AnimatePresence>
           {showMobileMenu && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
               className="md:hidden overflow-hidden border-t border-white/10 mt-3"
             >
-              <div className="pt-4 pb-6 space-y-4">
-                {/* Mobile Navigation Links */}
-                <div className="grid grid-cols-2 gap-3">
+              <div className="py-4">
+                <div className="space-y-2">
                   <MobileNavLink 
                     to="/Feed" 
-                    icon={<HiOutlineHome size={22} />} 
+                    icon={<HiOutlineHome size={20} />} 
                     label="Home" 
                     active={location.pathname === '/Feed'}
                   />
                   <MobileNavLink 
                     to="/Discover" 
-                    icon={<HiOutlineSearch size={22} />} 
+                    icon={<HiOutlineSearch size={20} />} 
                     label="Explore" 
                     active={location.pathname === '/Discover'}
                   />
                   <MobileNavLink 
-                    to="/Community" 
-                    icon={<FaUsers size={20} />} 
-                    label="Community" 
-                    active={location.pathname === '/Community'}
-                  />
-                  <MobileNavLink 
                     to="/ProfileUser" 
-                    icon={<HiOutlineUser size={22} />} 
-                    label="Profile" 
+                    icon={<HiOutlineUser size={20} />} 
+                    label="My Profile" 
                     active={location.pathname === '/ProfileUser'}
                   />
-                </div>
-
-                {/* User Info */}
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-                  <img
-                    src={user?.image || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}
-                    alt="Perfil"
-                    className="h-10 w-10 rounded-full object-cover ring-2 ring-purple-500/30"
+                  <MobileNavLink 
+                    to="/Comfig" 
+                    icon={<HiOutlineCog size={20} />} 
+                    label="Settings" 
+                    active={location.pathname === '/Comfig'}
                   />
-                  <div className="flex-1">
-                    <p className="font-semibold text-white text-sm">{user?.name || 'Usuario'}</p>
-                    <p className="text-xs text-white/40">@{user?.username || 'user'}</p>
-                  </div>
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="rounded-lg p-2 text-white/60 hover:text-white hover:bg-white/10"
+                  <button 
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
                   >
-                    <HiOutlineCog size={18} />
-                  </motion.button>
+                    <HiOutlineLogout size={18} /> 
+                    <span>Sign Out</span>
+                  </button>
                 </div>
-
-                {/* Mobile User Menu Dropdown */}
-                <AnimatePresence>
-                  {showUserMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden rounded-xl bg-white/5"
-                    >
-                      <div className="p-2 space-y-1">
-                        <MobileMenuLink to="/Config" icon={<HiOutlineCog size={18}/>} label="Settings" />
-                        <motion.button 
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleLogout}
-                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-red-500/10"
-                        >
-                          <HiOutlineLogout size={18} /> 
-                          <span>Sign Out</span>
-                        </motion.button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
             </motion.div>
           )}
@@ -338,11 +260,8 @@ const Header = () => {
 
         {/* Backdrop for dropdowns */}
         {(showNotifications || showUserMenu || showMobileMenu) && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[-1] bg-black/20 backdrop-blur-sm md:hidden"
+          <div 
+            className="fixed inset-0 z-[-1] bg-black/20 md:hidden" 
             onClick={() => {
               setShowNotifications(false)
               setShowUserMenu(false)
@@ -350,10 +269,9 @@ const Header = () => {
             }}
           />
         )}
-      </motion.header>
 
-      {/* Create Post Modal */}
-      <CreatePost isOpen={showCreatePost} onClose={() => setShowCreatePost(false)} />
+        <CreatePost isOpen={showCreatePost} onClose={() => setShowCreatePost(false)} />
+      </motion.header>
     </>
   )
 }
@@ -362,12 +280,8 @@ const Header = () => {
 const HeaderLink = ({ to, icon, label, active }) => (
   <Link to={to}>
     <motion.div
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
-        active 
-          ? 'text-purple-400 bg-gradient-to-r from-purple-500/10 to-pink-500/10' 
-          : 'text-white/60 hover:text-white hover:bg-white/5'
+      className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
+        active ? 'text-purple-400 bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'
       }`}
     >
       {icon}
@@ -378,35 +292,18 @@ const HeaderLink = ({ to, icon, label, active }) => (
 
 const MobileNavLink = ({ to, icon, label, active }) => (
   <Link to={to}>
-    <motion.div
-      whileTap={{ scale: 0.95 }}
-      className={`flex flex-col items-center justify-center rounded-xl p-3 transition-all ${
-        active 
-          ? 'text-purple-400 bg-gradient-to-b from-purple-500/10 to-transparent' 
-          : 'text-white/60 hover:text-white hover:bg-white/5'
-      }`}
-    >
-      <div className="mb-1">{icon}</div>
-      <span className="text-xs font-medium">{label}</span>
-    </motion.div>
+    <div className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+      active ? 'text-purple-400 bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'
+    }`}>
+      {icon}
+      <span>{label}</span>
+    </div>
   </Link>
 )
 
 const MenuLink = ({ to, icon, label }) => (
   <Link to={to}>
-    <motion.div
-      whileHover={{ x: 4 }}
-      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-all"
-    >
-      <span className="text-purple-400">{icon}</span>
-      {label}
-    </motion.div>
-  </Link>
-)
-
-const MobileMenuLink = ({ to, icon, label }) => (
-  <Link to={to}>
-    <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-all">
+    <div className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-all">
       <span className="text-purple-400">{icon}</span>
       {label}
     </div>
