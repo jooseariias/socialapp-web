@@ -66,7 +66,7 @@ const DiscoverPage = () => {
   const loadDiscoverData = useCallback(async (pageNum = 1, reset = false) => {
     setLoading(true)
     try {
-      const response = await fetch(`http://localhost:8000/api/discover?page=${pageNum}&limit=${limit}`)
+      const response = await fetch(`https://back-social-movil.onrender.com/api/discover?page=${pageNum}&limit=${limit}`)
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -117,7 +117,7 @@ const DiscoverPage = () => {
     setLoading(true)
     try {
       const response = await fetch(
-        `http://localhost:8000/api//search?q=${encodeURIComponent(query)}&type=${type}&page=${pageNum}&limit=${limit}`
+        `https://back-social-movil.onrender.com/api/search?q=${encodeURIComponent(query)}&type=${type}&page=${pageNum}&limit=${limit}`
       )
       
       if (!response.ok) {
