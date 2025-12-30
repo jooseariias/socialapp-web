@@ -15,13 +15,28 @@ import DiscoverPage from './Screens/DiscoverSearch'
 import Comfig from './Screens/Comfig'
 import ProfileAddFollow from './Screens/user/ProfileAddFollow.jsx'
 
+
 function App() {
+
   const ClientIdGoogle = import.meta.env.VITE_Client_ID
   const fetchUser = useUserStore(state => state.fetchUser)
+  const initializeFromStorage = useUserStore(state => state.initializeFromStorage);
+  const loading = useUserStore(state => state.loading);
+
 
   useEffect(() => {
     fetchUser()
-  }, [fetchUser])
+    initializeFromStorage();
+  }, [fetchUser,initializeFromStorage])
+
+
+    if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#2b0a3d]">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-fuchsia-500 border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <GoogleOAuthProvider clientId={ClientIdGoogle}>
