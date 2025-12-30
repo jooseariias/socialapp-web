@@ -18,6 +18,7 @@ import { IoMdCheckmarkCircle } from 'react-icons/io'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Header from '../Components/Header'
 const BACK_URL = import.meta.env.VITE_BACK_URL
+import { Link } from 'react-router-dom'
 
 const DiscoverPage = () => {
   const [activeFilter, setActiveFilter] = useState('all')
@@ -33,18 +34,18 @@ const DiscoverPage = () => {
     posts: [],
     totals: { users: 0, posts: 0 },
     hasMore: { users: false, posts: false },
-    page: 1
+    page: 1,
   })
   const [searchResults, setSearchResults] = useState({
     users: [],
     posts: [],
     totals: { users: 0, posts: 0 },
-    hasMore: { users: false, posts: false }
+    hasMore: { users: false, posts: false },
   })
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [isDiscoverMode, setIsDiscoverMode] = useState(true) // true = discover, false = search
-  
+
   const location = useLocation()
   const navigate = useNavigate()
   const limit = 10
@@ -55,7 +56,7 @@ const DiscoverPage = () => {
     const q = params.get('q') || ''
     const type = params.get('type') || 'all'
     const pageParam = params.get('page') || '1'
-    
+
     setSearchQuery(q)
     setInputValue(q)
     setActiveFilter(type)
@@ -64,94 +65,100 @@ const DiscoverPage = () => {
   }, [location.search])
 
   // Función para cargar datos de discover
-  const loadDiscoverData = useCallback(async (pageNum = 1, reset = false) => {
-    setLoading(true)
-    try {
-      const response = await fetch(`${BACK_URL}/api/discover?page=${pageNum}&limit=${limit}`)
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+  const loadDiscoverData = useCallback(
+    async (pageNum = 1, reset = false) => {
+      setLoading(true)
+      try {
+        const response = await fetch(`${BACK_URL}/api/discover?page=${pageNum}&limit=${limit}`)
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const result = await response.json()
+        const data = result.data || result
+
+        // Asegurarse de que los datos tienen la estructura correcta
+        const formattedData = {
+          users: data.users || [],
+          posts: data.posts || [],
+          totals: data.totals || { users: data.users?.length || 0, posts: data.posts?.length || 0 },
+          hasMore: data.hasMore || { users: false, posts: false },
+          page: data.page || pageNum,
+        }
+
+        if (reset) {
+          setDiscoverData(formattedData)
+        } else {
+          setDiscoverData(prev => ({
+            ...formattedData,
+            users: [...prev.users, ...(formattedData.users || [])],
+            posts: [...prev.posts, ...(formattedData.posts || [])],
+          }))
+        }
+
+        setHasMore(formattedData.hasMore.users || formattedData.hasMore.posts)
+      } catch (error) {
+        console.error('Error loading discover data:', error)
+      } finally {
+        setLoading(false)
       }
-      
-      const result = await response.json()
-      const data = result.data || result
-      
-      // Asegurarse de que los datos tienen la estructura correcta
-      const formattedData = {
-        users: data.users || [],
-        posts: data.posts || [],
-        totals: data.totals || { users: data.users?.length || 0, posts: data.posts?.length || 0 },
-        hasMore: data.hasMore || { users: false, posts: false },
-        page: data.page || pageNum
-      }
-      
-      if (reset) {
-        setDiscoverData(formattedData)
-      } else {
-        setDiscoverData(prev => ({
-          ...formattedData,
-          users: [...prev.users, ...(formattedData.users || [])],
-          posts: [...prev.posts, ...(formattedData.posts || [])]
-        }))
-      }
-      
-      setHasMore(formattedData.hasMore.users || formattedData.hasMore.posts)
-    } catch (error) {
-      console.error('Error loading discover data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [limit])
+    },
+    [limit],
+  )
 
   // Función para realizar la búsqueda
-  const performSearch = useCallback(async (query, type, pageNum, reset = false) => {
-    if (!query.trim()) {
-      setSearchResults({
-        users: [],
-        posts: [],
-        totals: { users: 0, posts: 0 },
-        hasMore: { users: false, posts: false }
-      })
-      return
-    }
+  const performSearch = useCallback(
+    async (query, type, pageNum, reset = false) => {
+      if (!query.trim()) {
+        setSearchResults({
+          users: [],
+          posts: [],
+          totals: { users: 0, posts: 0 },
+          hasMore: { users: false, posts: false },
+        })
+        return
+      }
 
-    setLoading(true)
-    try {
-      const response = await fetch(
-        `${BACK_URL}/api/search?q=${encodeURIComponent(query)}&type=${type}&page=${pageNum}&limit=${limit}`
-      )
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      setLoading(true)
+      try {
+        const response = await fetch(
+          `${BACK_URL}/api/search?q=${encodeURIComponent(query)}&type=${type}&page=${pageNum}&limit=${limit}`,
+        )
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const result = await response.json()
+        const data = result.data || result
+
+        const formattedData = {
+          users: data.users || [],
+          posts: data.posts || [],
+          totals: data.totals || { users: data.users?.length || 0, posts: data.posts?.length || 0 },
+          hasMore: data.hasMore || { users: false, posts: false },
+        }
+
+        if (reset) {
+          setSearchResults(formattedData)
+        } else {
+          setSearchResults(prev => ({
+            ...formattedData,
+            users: [...prev.users, ...(formattedData.users || [])],
+            posts: [...prev.posts, ...(formattedData.posts || [])],
+          }))
+        }
+
+        setHasMore(formattedData.hasMore.users || formattedData.hasMore.posts)
+      } catch (error) {
+        console.error('Error searching:', error)
+      } finally {
+        setLoading(false)
       }
-      
-      const result = await response.json()
-      const data = result.data || result
-      
-      const formattedData = {
-        users: data.users || [],
-        posts: data.posts || [],
-        totals: data.totals || { users: data.users?.length || 0, posts: data.posts?.length || 0 },
-        hasMore: data.hasMore || { users: false, posts: false }
-      }
-      
-      if (reset) {
-        setSearchResults(formattedData)
-      } else {
-        setSearchResults(prev => ({
-          ...formattedData,
-          users: [...prev.users, ...(formattedData.users || [])],
-          posts: [...prev.posts, ...(formattedData.posts || [])]
-        }))
-      }
-      
-      setHasMore(formattedData.hasMore.users || formattedData.hasMore.posts)
-    } catch (error) {
-      console.error('Error searching:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [limit])
+    },
+    [limit],
+  )
 
   // Cargar datos iniciales (discover) o búsqueda
   useEffect(() => {
@@ -159,7 +166,7 @@ const DiscoverPage = () => {
     const q = params.get('q') || ''
     const type = params.get('type') || 'all'
     const pageParam = params.get('page') || '1'
-    
+
     if (q) {
       // Modo búsqueda
       performSearch(q, type, parseInt(pageParam), true)
@@ -172,14 +179,14 @@ const DiscoverPage = () => {
   }, [location.search, performSearch, loadDiscoverData])
 
   // Manejar cambio en el input
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     setInputValue(e.target.value)
   }
 
   // Manejar búsqueda con botón o Enter
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     if (e) e.preventDefault()
-    
+
     const query = inputValue.trim()
     if (query === searchQuery && query !== '') {
       // Si es la misma búsqueda, recargar primera página
@@ -190,49 +197,49 @@ const DiscoverPage = () => {
       navigate(`/discover?${params.toString()}`, { replace: true })
       return
     }
-    
+
     // Actualizar URL con nueva búsqueda
     const params = new URLSearchParams()
     if (query) params.set('q', query)
     params.set('type', activeFilter)
     params.set('page', '1')
-    
+
     navigate(`/discover?${params.toString()}`, { replace: true })
   }
 
   // Manejar tecla Enter en el input
-  const handleKeyPress = (e) => {
+  const handleKeyPress = e => {
     if (e.key === 'Enter') {
       handleSearch()
     }
   }
 
   // Manejar cambio de filtro
-  const handleFilterChange = (filter) => {
+  const handleFilterChange = filter => {
     setActiveFilter(filter)
-    
+
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
     params.set('type', filter)
     params.set('page', '1')
-    
+
     navigate(`/discover?${params.toString()}`, { replace: true })
   }
 
   // Cargar más resultados
   const loadMore = () => {
     if (loading || !hasMore) return
-    
+
     const nextPage = page + 1
     setPage(nextPage)
-    
+
     const params = new URLSearchParams()
     if (searchQuery) {
       params.set('q', searchQuery)
       params.set('type', activeFilter)
     }
     params.set('page', nextPage.toString())
-    
+
     navigate(`/discover?${params.toString()}`, { replace: true })
   }
 
@@ -245,7 +252,7 @@ const DiscoverPage = () => {
   const filters = [
     { key: 'all', label: 'All' },
     { key: 'users', label: 'People' },
-    { key: 'posts', label: 'Posts' }
+    { key: 'posts', label: 'Posts' },
   ]
 
   const handleLike = postId => {
@@ -318,32 +325,39 @@ const DiscoverPage = () => {
         </h2>
         <div className="grid grid-cols-2 gap-4 py-3 md:grid-cols-3 lg:grid-cols-6">
           {users.map(person => (
-            <motion.div
-              key={person._id}
-              whileHover={{ scale: 1.05 }}
-              className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm"
-            >
-              <div className="relative">
-                <img
-                  src={person.image || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}
-                  alt={person.name}
-                  className="h-20 w-20 rounded-full object-cover ring-2 ring-purple-500 ring-offset-2 ring-offset-slate-900"
-                />
-              </div>
-              <div className="text-center">
-                <p className="truncate text-sm font-medium text-white">{person.name}</p>
-                <p className="truncate text-xs text-white/60">{person.username || `@${person.name.toLowerCase().replace(/\s+/g, '')}`}</p>
-                {person.city && (
-                  <p className="truncate text-xs text-white/40 mt-1">{person.city}</p>
-                )}
-                {person.description && (
-                  <p className="mt-2 text-xs text-white/50 line-clamp-2">{person.description}</p>
-                )}
-              </div>
-              <button className="w-full rounded-lg bg-button px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-600">
-                Follow
-              </button>
-            </motion.div>
+            <Link to={`/AddFollow/${person._id}`}>
+              <motion.div
+                key={person._id}
+                whileHover={{ scale: 1.05 }}
+                className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm"
+              >
+                <div className="relative">
+                  <img
+                    src={
+                      person.image ||
+                      'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
+                    }
+                    alt={person.name}
+                    className="h-20 w-20 rounded-full object-cover ring-2 ring-purple-500 ring-offset-2 ring-offset-slate-900"
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="truncate text-sm font-medium text-white">{person.name}</p>
+                  <p className="truncate text-xs text-white/60">
+                    {person.username || `@${person.name.toLowerCase().replace(/\s+/g, '')}`}
+                  </p>
+                  {person.city && (
+                    <p className="mt-1 truncate text-xs text-white/40">{person.city}</p>
+                  )}
+                  {person.description && (
+                    <p className="mt-2 line-clamp-2 text-xs text-white/50">{person.description}</p>
+                  )}
+                </div>
+                <button className="bg-button w-full rounded-lg px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-600">
+                  Follow
+                </button>
+              </motion.div>
+            </Link>
           ))}
         </div>
       </>
@@ -370,70 +384,77 @@ const DiscoverPage = () => {
         </h2>
         <div className="grid grid-cols-1 gap-6 py-3 lg:grid-cols-2">
           {posts.map(post => (
-            <motion.div
-              key={post._id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur-sm"
-            >
-              {/* Header del post */}
-              <div className="flex items-start justify-between p-6 pb-4">
-                <div className="flex items-start space-x-3">
-                  <img
-                    src={post.user?.image || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}
-                    alt={post.user?.name || 'User'}
-                    className="h-12 w-12 rounded-full object-cover"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold text-white">{post.user?.name || 'Unknown User'}</h3>
-                    </div>
-                    <div className="mt-1 flex items-center space-x-4 text-sm text-white/60">
-                      <span>{post.user?.username || `@${(post.user?.name || 'user').toLowerCase().replace(/\s+/g, '')}`}</span>
-                      <span>•</span>
-                      <span>{formatDate(post.createdAt)}</span>
+            <Link to={`/AddFollow/${post?.user?._id}`}>
+              <motion.div
+                key={post._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur-sm"
+              >
+                {/* Header del post */}
+                <div className="flex items-start justify-between p-6 pb-4">
+                  <div className="flex items-start space-x-3">
+                    <img
+                      src={
+                        post.user?.image ||
+                        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
+                      }
+                      alt={post.user?.name || 'User'}
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-semibold text-white">
+                          {post.user?.name || 'Unknown User'}
+                        </h3>
+                      </div>
+                      <div className="mt-1 flex items-center space-x-4 text-sm text-white/60">
+                        <span>
+                          {post.user?.username ||
+                            `@${(post.user?.name || 'user').toLowerCase().replace(/\s+/g, '')}`}
+                        </span>
+                        <span>•</span>
+                        <span>{formatDate(post.createdAt)}</span>
+                      </div>
                     </div>
                   </div>
+                  <button className="rounded-full p-2 text-white/40 hover:bg-white/10 hover:text-white/60">
+                    <FaEllipsisH />
+                  </button>
                 </div>
-                <button className="rounded-full p-2 text-white/40 hover:bg-white/10 hover:text-white/60">
-                  <FaEllipsisH />
-                </button>
-              </div>
 
-              {/* Contenido del post - solo se muestra si existe */}
-              {post.content && (
-                <div className="px-6 pb-4">
-                  <p className="break-words text-white">{post.content}</p>
+                {/* Contenido del post - solo se muestra si existe */}
+                {post.content && (
+                  <div className="px-6 pb-4">
+                    <p className="break-words text-white">{post.content}</p>
+                  </div>
+                )}
+
+                {/* Media del post */}
+                {post.image && (
+                  <div className="overflow-hidden">
+                    <img
+                      src={post.image}
+                      alt="Post content"
+                      className="h-auto max-h-[500px] w-full object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Contadores de interacciones */}
+                <div className="flex items-center justify-between p-6 pt-4 text-sm text-white/60">
+                  <div className="flex items-center space-x-4">
+                    <span>{getLikeCount(post).toLocaleString()} likes</span>
+                    <span
+                      className="cursor-pointer transition-colors hover:text-blue-400"
+                      onClick={() => toggleComments(post._id)}
+                    >
+                      View all {post.comments?.length || 0} comments
+                    </span>
+                  </div>
                 </div>
-              )}
-
-              {/* Media del post */}
-              {post.image && (
-                <div className="overflow-hidden">
-                  <img
-                    src={post.image}
-                    alt="Post content"
-                    className="h-auto w-full object-cover max-h-[500px]"
-                  />
-                </div>
-              )}
-
-              {/* Contadores de interacciones */}
-              <div className="flex items-center justify-between p-6 pt-4 text-sm text-white/60">
-                <div className="flex items-center space-x-4">
-                  <span>{getLikeCount(post).toLocaleString()} likes</span>
-                  <span
-                    className="cursor-pointer transition-colors hover:text-blue-400"
-                    onClick={() => toggleComments(post._id)}
-                  >
-                    View all {post.comments?.length || 0} comments
-                  </span>
-                </div>
-              </div>
-
-              
-            
-            </motion.div>
+              </motion.div>
+            </Link>
           ))}
         </div>
       </>
@@ -442,16 +463,20 @@ const DiscoverPage = () => {
 
   // Renderizar estado vacío de búsqueda
   const renderEmptySearchState = () => {
-    if (!isDiscoverMode && searchQuery && !loading && 
-        (searchResults.users || []).length === 0 && 
-        (searchResults.posts || []).length === 0) {
+    if (
+      !isDiscoverMode &&
+      searchQuery &&
+      !loading &&
+      (searchResults.users || []).length === 0 &&
+      (searchResults.posts || []).length === 0
+    ) {
       return (
         <div className="flex flex-col items-center justify-center py-20">
-          <div className="rounded-full bg-white/10 p-6 mb-4">
+          <div className="mb-4 rounded-full bg-white/10 p-6">
             <FaSearch className="text-4xl text-white/40" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">No results found</h3>
-          <p className="text-white/60 text-center max-w-md mb-6">
+          <h3 className="mb-2 text-xl font-semibold text-white">No results found</h3>
+          <p className="mb-6 max-w-md text-center text-white/60">
             Try searching for something else or check your spelling
           </p>
           <button
@@ -468,16 +493,19 @@ const DiscoverPage = () => {
 
   // Renderizar estado inicial (modo discover)
   const renderDiscoverState = () => {
-    if (isDiscoverMode && !loading && 
-        (discoverData.users || []).length === 0 && 
-        (discoverData.posts || []).length === 0) {
+    if (
+      isDiscoverMode &&
+      !loading &&
+      (discoverData.users || []).length === 0 &&
+      (discoverData.posts || []).length === 0
+    ) {
       return (
         <div className="flex flex-col items-center justify-center py-20">
-          <div className="rounded-full bg-white/10 p-6 mb-4">
+          <div className="mb-4 rounded-full bg-white/10 p-6">
             <FaStar className="text-4xl text-yellow-400" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Discover Amazing Content</h3>
-          <p className="text-white/60 text-center max-w-md">
+          <h3 className="mb-2 text-xl font-semibold text-white">Discover Amazing Content</h3>
+          <p className="max-w-md text-center text-white/60">
             Start exploring people and posts from around the world
           </p>
         </div>
@@ -491,18 +519,18 @@ const DiscoverPage = () => {
     if (isDiscoverMode) {
       const users = discoverData.users || []
       const posts = discoverData.posts || []
-      
+
       if (users.length === 0 && posts.length === 0) return null
-      
+
       const totals = discoverData.totals || { users: users.length, posts: posts.length }
-      
+
       return (
         <div className="flex items-center gap-6 pt-4 text-sm text-white/60">
           <div className="flex items-center gap-2">
             <FaUsers className="text-white/40" />
             <span>{totals.users} people to discover</span>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <FaFire className="text-white/40" />
             <span>{totals.posts} trending posts</span>
@@ -511,26 +539,30 @@ const DiscoverPage = () => {
       )
     } else {
       if (!searchQuery) return null
-      
+
       const users = searchResults.users || []
       const posts = searchResults.posts || []
       const totals = searchResults.totals || { users: users.length, posts: posts.length }
-      
+
       if (users.length === 0 && posts.length === 0) return null
-      
+
       return (
         <div className="flex items-center gap-6 pt-4 text-sm text-white/60">
           {(activeFilter === 'all' || activeFilter === 'users') && users.length > 0 ? (
             <div className="flex items-center gap-2">
               <FaUser className="text-white/40" />
-              <span>{totals.users} {totals.users === 1 ? 'person' : 'people'}</span>
+              <span>
+                {totals.users} {totals.users === 1 ? 'person' : 'people'}
+              </span>
             </div>
           ) : null}
-          
+
           {(activeFilter === 'all' || activeFilter === 'posts') && posts.length > 0 ? (
             <div className="flex items-center gap-2">
               <FaImage className="text-white/40" />
-              <span>{totals.posts} {totals.posts === 1 ? 'post' : 'posts'}</span>
+              <span>
+                {totals.posts} {totals.posts === 1 ? 'post' : 'posts'}
+              </span>
             </div>
           ) : null}
         </div>
@@ -541,7 +573,7 @@ const DiscoverPage = () => {
   // Renderizar botón de limpiar búsqueda
   const renderClearSearchButton = () => {
     if (isDiscoverMode || !searchQuery) return null
-    
+
     return (
       <div className="flex justify-center pt-4">
         <button
@@ -648,11 +680,13 @@ const DiscoverPage = () => {
             )}
 
             {/* Loading indicator para búsqueda principal */}
-            {loading && (discoverData.users || []).length === 0 && (discoverData.posts || []).length === 0 && (
-              <div className="flex justify-center py-20">
-                <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-white"></div>
-              </div>
-            )}
+            {loading &&
+              (discoverData.users || []).length === 0 &&
+              (discoverData.posts || []).length === 0 && (
+                <div className="flex justify-center py-20">
+                  <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-white"></div>
+                </div>
+              )}
 
             {/* Botón de limpiar búsqueda */}
             {renderClearSearchButton()}

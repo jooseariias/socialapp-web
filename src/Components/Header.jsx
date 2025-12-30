@@ -134,7 +134,7 @@ const Header = () => {
                   >
                     <div className="px-4 py-3 border-b border-white/5">
                       <p className="truncate text-sm font-bold text-white">{user?.name || 'Usuario'}</p>
-                      <p className="truncate text-xs text-white/40">@{user?.username || 'user'}</p>
+                      <p className="truncate text-xs text-white/40">{user?.username || 'user'}</p>
                     </div>
                     <div className="p-1 space-y-1">
                       <MenuLink to="/ProfileUser" icon={<HiOutlineUser size={18}/>} label="Mi Perfil" />

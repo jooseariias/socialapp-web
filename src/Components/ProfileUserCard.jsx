@@ -19,6 +19,49 @@ export default function ProfileUserCard({
   handleImageChange,
 }) {
 
+
+  const tierStyles = {
+ follower: {
+  container: 'border-white/20 bg-white/10',
+  icon: 'text-white/70',
+  text: 'text-white/80'
+}
+,
+ relevant: {
+  container: 'border-emerald-400/30 bg-emerald-400/20',
+  icon: 'text-emerald-300',
+  text: 'text-emerald-200'
+}
+,
+  prominent: {
+  container: 'border-sky-400/30 bg-sky-400/20',
+  icon: 'text-sky-300',
+  text: 'text-sky-200'
+}
+,
+  figure: {
+  container: 'border-violet-400/30 bg-violet-400/20',
+  icon: 'text-violet-300',
+  text: 'text-violet-200'
+}
+,
+ elite: {
+  container: 'border-amber-400/40 bg-amber-400/25',
+  icon: 'text-amber-300',
+  text: 'text-amber-200'
+}
+,
+ top: {
+  container: 'border-rose-400/30 bg-rose-400/20',
+  icon: 'text-rose-300',
+  text: 'text-rose-200'
+}
+
+};
+const tier = profileData.tier || 'follower';
+const styles = tierStyles[tier];
+
+
   return (
     <div>
       <motion.section
@@ -155,23 +198,29 @@ export default function ProfileUserCard({
           </div>
         )}
 
-        <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/20 px-4 py-2 backdrop-blur-sm">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 text-amber-300"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span className="text-amber-200">{profileData.tier}</span>
-        </div>
+        <div
+  className={`flex items-center gap-2 rounded-full px-4 py-2 backdrop-blur-sm border ${styles.container}`}
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={`h-4 w-4 ${styles.icon}`}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+
+  <span className={styles.text}>
+    {tier}
+  </span>
+</div>
+
       </motion.div>
       {editing === 'image' && (
         <motion.div

@@ -507,7 +507,6 @@ export default function CardPostProfile(props) {
                 )}
               </div>
 
-              {/* FOOTER - Responsive */}
               <div className="border-t border-white/10 p-3 sm:p-4 lg:p-5 bg-black/20">
                 <div className="mb-2 sm:mb-3 flex justify-between text-[10px] sm:text-xs uppercase tracking-wider font-bold text-white/60">
                   <span>{getLikeCount(post)} likes</span>
