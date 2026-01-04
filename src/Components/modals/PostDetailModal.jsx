@@ -26,34 +26,34 @@ const PostDetailModal = ({
     <AnimatePresence>
       {showModal && (
         <>
-          {/* Fondo difuminado */}
+          {/* Fondo */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowModal(false)}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 z-50 bg-white/10 backdrop-blur-md min-h-screen"
           />
 
-          {/* Modal principal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Modal */}
+          <div className="fixed inset-0 z-50 flex items-center   justify-center p-3">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              className="relative flex h-[95vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800/90 via-purple-900/90 to-slate-800/90"
+              className="relative flex h-[95vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800/90 via-purple-900/90 to-slate-800/90 flex-col md:flex-row"
             >
-              {/* Botón cerrar */}
+              {/* Cerrar */}
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-5 right-5 z-20 rounded-full bg-black/40 p-3 text-white/70 hover:text-white transition-all duration-300 hover:scale-110"
+                className="absolute top-4 right-4 z-20 rounded-full hover:cursor-pointer bg-black/40 p-3 text-white/70 hover:text-white transition"
               >
-                <FaTimes size={20} />
+                <FaTimes size={18} />
               </button>
 
-              {/* Lado izquierdo - Imagen */}
-              <div className="flex flex-1 items-center justify-center bg-black/40 p-6">
+              {/* Imagen */}
+              <div className="flex flex-1 items-center justify-center bg-black/40 p-4 md:p-6">
                 {postImage && (
                   <img
                     src={postImage}
@@ -67,20 +67,48 @@ const PostDetailModal = ({
                 )}
               </div>
 
-              {/* Lado derecho - Contenido */}
-              <div className="flex w-[450px] flex-col border-l border-white/10">
-                {/* Header del usuario */}
+              {/* ===== MOBILE ONLY ===== */}
+              <div className="md:hidden px-5 py-4 space-y-4">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={postUser.image}
+                    className="h-10 w-10 rounded-full object-cover border border-white/10"
+                    alt={postUser.name}
+                  />
+                  <div>
+                    <p className="text-white font-semibold text-sm">
+                      {postUser.name}
+                    </p>
+                    <p className="text-xs text-white/50">
+                      {formatDate(post.createdAt)}
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-sm text-white/90 break-words">
+                  {postContent}
+                </p>
+              </div>
+
+              {/* ===== DESKTOP ONLY ===== */}
+              <div className="hidden md:flex w-[450px] flex-col border-l border-white/10">
+                {/* Header */}
                 <div className="flex gap-4 p-6">
-                  <img 
-                    src={postUser.image} 
+                  <img
+                    src={postUser.image}
                     className="h-14 w-14 rounded-full object-cover border border-white/10"
                     alt={postUser.name}
                   />
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white text-lg">{postUser.name}</span>
+                      <span className="font-semibold text-white/80 text-lg">
+                        {postUser.name}
+                      </span>
                       {userActiveP && (
-                        <IoMdCheckmarkCircle className="text-blue-500" size={18} />
+                        <IoMdCheckmarkCircle
+                          className="text-blue-500"
+                          size={18}
+                        />
                       )}
                     </div>
                     <p className="text-sm text-white/50">
@@ -89,12 +117,12 @@ const PostDetailModal = ({
                   </div>
                 </div>
 
-                {/* Contenido del post */}
-                <div className="px-6 py-5 text-sm break-words border-t border-white/10 text-white">
+                {/* Contenido */}
+                <div className="px-6 py-5 text-sm break-words font-medium border-t border-white/10 text-white">
                   {postContent}
                 </div>
 
-                {/* Estadísticas */}
+                {/* Stats */}
                 <div className="flex items-center justify-between px-6 py-4 border-t border-white/10">
                   <div className="flex items-center gap-2">
                     {liked ? (
@@ -102,59 +130,66 @@ const PostDetailModal = ({
                     ) : (
                       <FaRegHeart className="text-white/60" size={18} />
                     )}
-                    <span className="text-sm font-medium text-white ml-1">
-                      {postLikes.length + (liked ? 1 : 0)} likes
+                    <span className="text-sm font-medium text-white/80 ml-1">
+                      {postLikes.length + (liked ? 1 : 0)} Likes
                     </span>
                   </div>
-                  <span className="text-sm text-white/60">{comments.length} comments</span>
+                  <span className="text-sm  font-medium  text-white/80">
+                    {comments.length} Comments
+                  </span>
                 </div>
 
-                {/* Sección de comentarios */}
+                {/* Comentarios */}
                 <div className="flex-1 space-y-5 overflow-y-auto px-6 py-4">
                   {comments.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full py-10">
-                      <div className="text-white/30 mb-3">
-                        <FaRegHeart size={48} />
-                      </div>
-                      <p className="text-center text-white/50 font-medium">No comments yet</p>
-                      <p className="text-center text-sm text-white/40 mt-1">Be the first to comment</p>
+                      <FaRegHeart className="text-white/30 mb-3" size={48} />
+                      <p className="text-white/50 font-medium">
+                        No comments yet
+                      </p>
                     </div>
                   ) : (
                     comments.map(c => (
-                      <div 
-                        key={c._id} 
-                        className="group flex gap-4 p-3 rounded-xl hover:bg-white/5 transition-all duration-200"
+                      <div
+                        key={c._id}
+                        className="group flex gap-4 p-3 rounded-xl hover:bg-white/5 transition"
                       >
-                        <div className="relative shrink-0">
-                          <img 
-                            src={c.user?.image} 
-                            className="h-10 w-10 rounded-full object-cover border border-white/10"
-                            alt={c.user?.username}
-                          />
-                          
-                        </div>
-                        <div className="flex-1 min-w-0">
+                        <img
+                          src={c.user?.image}
+                          className="h-10 w-10 rounded-full object-cover border border-white/10"
+                          alt={c.user?.username}
+                        />
+
+                        <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-white text-sm">{c.user?.username}</span>
+                            <span className="font-bold text-white text-sm">
+                              {c.user?.username}
+                            </span>
                             {isCurrentUserComment(c.user?._id) && (
-                              <span className="text-xs bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 px-2 py-0.5 rounded-full">
+                              <span className="text-xs bg-blue-500/20 text-blue-300 px-2 rounded-full">
                                 You
                               </span>
                             )}
                           </div>
-                          <p className="text-white/90 text-sm leading-relaxed mb-2">{c.text}</p>
-                          
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-white/40">{formatDate(c.createdAt)}</span>
-                            
-                            {/* Botón eliminar */}
+
+                          <p className="text-sm text-white/90 mb-2">
+                            {c.text}
+                          </p>
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-white/40">
+                              {formatDate(c.createdAt)}
+                            </span>
+
                             {isCurrentUserComment(c.user?._id) && (
                               <button
-                                onClick={() => handleDeleteClick(post._id, c._id)}
-                                className="flex items-center gap-1.5 text-xs text-white/40 hover:text-red-400 transition-colors"
+                                onClick={() =>
+                                  handleDeleteClick(post._id, c._id)
+                                }
+                                className="flex items-center hover:cursor-pointer gap-1 text-xs text-white/40 hover:text-red-400 transition-all duration-300"
                               >
                                 <FaTrashAlt size={11} />
-                                <span>Delete</span>
+                                Delete
                               </button>
                             )}
                           </div>
@@ -164,26 +199,28 @@ const PostDetailModal = ({
                   )}
                 </div>
 
-                {/* Input de comentario */}
+                {/* Input */}
                 <div className="border-t border-white/10 p-6">
-                  <form onSubmit={handleAddComment} className="flex gap-3">
+                  <form
+                    onSubmit={handleAddComment}
+                    className="flex gap-3"
+                  >
                     <input
                       value={comment}
                       onChange={e => setComment(e.target.value)}
                       placeholder="Write a comment..."
-                      className="flex-1 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-white placeholder-white/40 focus:border-purple-500/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-300"
+                      className="flex-1 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-white placeholder-white/40 focus:outline-none"
                     />
                     <button
                       type="submit"
                       disabled={!comment.trim()}
-                      className={`relative flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition-all duration-300 ${
+                      className={`rounded-full px-5 py-3 text-sm font-medium ${
                         comment.trim()
-                          ? 'bg-gradient-to-r from-purple-600 via-purple-500 to-purple-500 text-white shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/35 hover:scale-[1.02] active:scale-95'
-                          : 'cursor-not-allowed bg-white/5 text-white/30'
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-white/5 text-white/30 cursor-not-allowed'
                       }`}
                     >
-                      <FaPaperPlane className="text-sm" />
-                      <span>Post</span>
+                      <FaPaperPlane />
                     </button>
                   </form>
                 </div>

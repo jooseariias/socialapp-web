@@ -18,11 +18,11 @@ const ModalDeleteComement = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleCancelDelete}
-            className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 z-[60] mt-4 mx-4 bg-white/10 backdrop-blur-md min-gh-screen"
           />
 
           {/* Modal de confirmación */}
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4  min-gh-screen">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -31,7 +31,7 @@ const ModalDeleteComement = ({
               className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800/90 via-purple-900/90 to-slate-800/90 p-6 shadow-xl"
             >
               {/* Icono de advertencia */}
-              <div className="mb-4 flex justify-center">
+              <div className="mb-4 flex justify-center ">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-500/20">
                   <FaTrash className="text-2xl text-red-500" />
                 </div>

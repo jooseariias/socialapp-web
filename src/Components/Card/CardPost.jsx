@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fa'
 import { IoMdCheckmarkCircle } from 'react-icons/io'
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 
 const CardPost = ({
   expanded,
@@ -40,6 +41,10 @@ const CardPost = ({
   handleDeleteClick,
   post,
 }) => {
+
+  const [userCheck] = useState(false)
+
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 25 }}
@@ -56,8 +61,10 @@ const CardPost = ({
             />
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-white">{postUser.name}</h3>
+                <h3 className="font-semibold text-white/80">{postUser.name}</h3>
+                {userCheck && (
                 <IoMdCheckmarkCircle className="text-blue-500" />
+                )}
               </div>
               <p className="text-sm text-white/50">
                 {postUser.username} • {formatDate(post.createdAt)}
@@ -68,14 +75,14 @@ const CardPost = ({
       </Link>
 
       <div className="mt-4 break-words text-white">
-        <p>{truncate(postContent)}</p>
+        <p className='text-md font-medium'>{truncate(postContent)}</p>
 
         {postContent.length > 150 && (
           <button
             onClick={() => setExpanded(!expanded)}
             className="mt-2 text-sm text-blue-400 hover:text-blue-300"
           >
-            {expanded ? 'Ver menos' : 'Ver más'}
+            {expanded ? 'View less' : 'View more'}
           </button>
         )}
       </div>
@@ -92,21 +99,21 @@ const CardPost = ({
         </div>
       )}
 
-      <div className="mt-4 flex justify-between text-sm text-white/60">
-        <span>{postLikes.length + (liked ? 1 : 0)} likes</span>
-        <span>{comments.length} comments</span>
+      <div className="mt-4 flex justify-between text-sm font-medium text-white/60">
+        <span>{postLikes.length + (liked ? 1 : 0)} Likes</span>
+        <span className='hover:cursor-pointer hover:scale-105'  onClick={() => setShowComments(!showComments)}>{comments.length} comments</span>
       </div>
 
-      <div className="mt-4 flex border-t border-white/10 pt-4">
+      <div className="mt-4 flex border-t border-white/10 font-semibold pt-4">
         <button
           onClick={handleLike}
           disabled={loading}
-          className={`flex flex-1 items-center justify-center gap-2 transition ${
+          className={`flex flex-1 items-center  justify-center gap-2 transition ${
             liked ? 'text-red-500' : 'text-white/60 hover:text-white'
           } ${loading ? 'cursor-not-allowed opacity-50' : ''}`}
         >
           {liked ? <FaHeart /> : <FaRegHeart />}
-          {loading ? '...' : 'Like'}
+          {loading ? '...' : 'MyLike'}
         </button>
 
         {/* Botón Comment para mostrar/ocultar comentarios */}
@@ -231,11 +238,11 @@ const CardPost = ({
                           {isCurrentUserComment(commentItem.user?._id) && (
                             <button
                               onClick={() => handleDeleteClick(post._id, commentItem._id)}
-                              className="flex items-center gap-1 text-white/40 opacity-20 transition-all duration-300 group-hover:opacity-100 hover:scale-105 hover:text-red-400"
-                              title="Eliminar comentario"
+                              className="flex items-center hover:cursor-pointer gap-1 text-white/40 opacity-20 transition-all duration-300 group-hover:opacity-100 hover:scale-105 hover:text-red-400"
+                              title="delete comment"
                             >
                               <FaTrashAlt size={11} />
-                              <span className="text-xs">Eliminar</span>
+                              <span className="text-xs ">Eliminar</span>
                             </button>
                           )}
                         </div>
