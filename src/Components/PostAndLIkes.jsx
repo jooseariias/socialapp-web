@@ -3,7 +3,7 @@ import {
   FaRegImage,
   FaRegHeart,
 } from 'react-icons/fa'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useUserStore } from '../Store/useUserStore'
 
 import ModalDeletePost from './post/ModalDeletePostComment'
@@ -38,7 +38,7 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
   const [editContent, setEditContent] = useState('')
   const [commentMenu, setCommentMenu] = useState(null)
   const [showEmojiPicker, setShowEmojiPicker] = useState(null)
-
+  const [deleteCommentModal, setDeleteCommentModal] = useState(false)
   const emojiPickerRef = useRef(null)
   const commentInputRefs = useRef({})
 
@@ -157,23 +157,7 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
     setEditContent('')
   }
 
-  const handleSaveEdit = async postId => {
-    if (!editContent.trim()) return
-    try {
-      setLoading(prev => ({ ...prev, [`edit-${postId}`]: true }))
-      await putPost(postId, { content: editContent })
-      setPostUser(prev =>
-        prev.map(post => (post._id === postId ? { ...post, content: editContent } : post)),
-      )
-      setEditPost(null)
-      setEditContent('')
-    } catch (error) {
-      console.error('Error editing post:', error)
-    } finally {
-      setLoading(prev => ({ ...prev, [`edit-${postId}`]: false }))
-    }
-  }
-
+ 
   const handleReportPost = postId => {
     console.log(`Reporting post ${postId}`)
     setPostMenu(null)
@@ -246,10 +230,15 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
       }
 
       if (result.data) {
+        console.log('Comment created:', result.data)
         setComments(prev => ({
           ...prev,
           [postId]: (prev[postId] || []).map(comment =>
-            comment.id === tempComment.id
+
+            
+
+            comment?.id === tempComment?.id
+            
               ? {
                   _id: result.data._id,
                   text: result.data.text,
@@ -288,21 +277,24 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
     setDeleteModal({ show: false, postId: null, commentId: null, commentText: '' })
   }
 
-  const handleDeleteComment = async () => {
-    const { postId, commentId } = deleteModal
+  const handleDeleteComment = async ( postId, commentId) => {
+   
+    setDeleteCommentModal(true)
+
     try {
-      setLoading(prev => ({ ...prev, [`delete-${commentId}`]: true }))
-      await postDeleteComment(postId, commentId)
+      await postDeleteComment(commentId, postId)
       setComments(prev => ({
         ...prev,
         [postId]: (prev[postId] || []).filter(comment => comment._id !== commentId),
       }))
-      closeDeleteModal()
+      
     } catch (error) {
       console.error('Error deleting comment:', error)
     } finally {
       setLoading(prev => ({ ...prev, [`delete-${commentId}`]: false }))
     }
+
+    setDeleteCommentModal(false)
   }
 
   const toggleComments = postId => {
@@ -384,9 +376,14 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
     return wasAlreadyLiked ? Math.max(baseLikes, localLike) : baseLikes + localLike
   }
 
-  const canDeleteComment = (comment, post) => {
-    return comment.userId === currentUserId || post.user._id === currentUserId
-  }
+  const canDeleteComment = useCallback(
+    commentUserId => {
+      if (!currentUserId || !commentUserId) return false
+      return String(commentUserId) === String(currentUserId)
+    },
+    [currentUserId],
+  )
+      
 
   const isPostOwner = post => {
     return post.user._id === currentUserId
@@ -425,7 +422,6 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
               editPost={editPost}
               editContent={editContent}
               setEditContent={setEditContent}
-              handleSaveEdit={handleSaveEdit}
               cancelEdit={cancelEdit}
               getLikeCount={getLikeCount}
               likedPosts={likedPosts}
@@ -450,6 +446,7 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
               needsTruncation={needsTruncation}
               toggleExpand={toggleExpand}
               expandedPosts={expandedPosts}
+              handleDeleteComment={handleDeleteComment}
             />
           ))}
         </div>

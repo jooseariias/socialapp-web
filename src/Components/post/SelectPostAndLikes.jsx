@@ -22,7 +22,7 @@ export default function SelectPostAndLikes( {activeTab, setActiveTab} ) {
                         key={tab.name}
                         onClick={() => setActiveTab(tab.name)}
                         className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold transition-all ${
-                          isActive ? 'bg-blue-500 text-white shadow-md' : 'text-white/60 hover:text-white'
+                          isActive ? 'bg-button text-white shadow-md hover:cursor-pointer' : 'text-white/60 hover:text-white hover:cursor-pointer' 
                         }`}
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
