@@ -1,8 +1,5 @@
 import { motion } from 'framer-motion'
-import {
-  FaRegImage,
-  FaRegHeart,
-} from 'react-icons/fa'
+import { FaRegImage, FaRegHeart } from 'react-icons/fa'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useUserStore } from '../Store/useUserStore'
 
@@ -19,10 +16,11 @@ import postDelete from '../Services/post/deletePost'
 import putPost from '../Services/post/putPost'
 
 export default function PostAndLikes({ activeTab, setActiveTab }) {
-  
   const [postUser, setPostUser] = useState(null)
   const [likedPosts, setLikedPosts] = useState(new Set())
   const [comments, setComments] = useState({})
+  console.log('comments', comments)
+
   const [newComment, setNewComment] = useState('')
   const [showComments, setShowComments] = useState(null)
   const [expandedPosts, setExpandedPosts] = useState(new Set())
@@ -157,7 +155,6 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
     setEditContent('')
   }
 
- 
   const handleReportPost = postId => {
     console.log(`Reporting post ${postId}`)
     setPostMenu(null)
@@ -201,17 +198,18 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
 
   const handleAddComment = async postId => {
     if (!newComment.trim()) return
-
+    const tempId = Date.now()
     const tempComment = {
-      id: Date.now(),
+      id: tempId,
       text: newComment,
       user: user?.name || 'You',
       userId: currentUserId,
       userImage: user?.image,
       timestamp: new Date().toLocaleTimeString(),
-      _id: `temp-${Date.now()}`,
+      _id: `temp-${tempId}`,
       createdAt: new Date().toISOString(),
     }
+
 
     setComments(prev => ({
       ...prev,
@@ -225,29 +223,23 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
       setLoading(prev => ({ ...prev, [`comment-${postId}`]: true }))
       const result = await postCreateComment(postId, commentText)
 
-      if (result.status >= 400) {
-        throw new Error(result.error || 'Error adding comment')
-      }
+      if (result.status >= 400) throw new Error(result.error)
 
       if (result.data) {
-        console.log('Comment created:', result.data)
         setComments(prev => ({
           ...prev,
           [postId]: (prev[postId] || []).map(comment =>
 
-            
-
-            comment?.id === tempComment?.id
-            
+            comment.id === tempId
               ? {
-                  _id: result.data._id,
-                  text: result.data.text,
-                  user: result.data.user?.name || 'You',
-                  userId: result.data.user?._id || currentUserId,
-                  userImage: result.data.user?.image,
-                  createdAt: result.data.createdAt,
-                  timestamp: new Date(result.data.createdAt).toLocaleTimeString(),
-                }
+                _id: result.data._id,
+                text: result.data.text || commentText,
+                user: result.data.user?.name || user?.name,
+                userId: result.data.user?._id || currentUserId,
+                userImage: result.data.user?.image || user?.image,
+                createdAt: result.data.createdAt,
+                timestamp: new Date(result.data.createdAt).toLocaleTimeString(),
+              }
               : comment,
           ),
         }))
@@ -256,7 +248,7 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
       console.error('Error adding comment:', error)
       setComments(prev => ({
         ...prev,
-        [postId]: (prev[postId] || []).filter(comment => comment.id !== tempComment.id),
+        [postId]: (prev[postId] || []).filter(c => c.id !== tempId),
       }))
     } finally {
       setLoading(prev => ({ ...prev, [`comment-${postId}`]: false }))
@@ -277,8 +269,7 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
     setDeleteModal({ show: false, postId: null, commentId: null, commentText: '' })
   }
 
-  const handleDeleteComment = async ( postId, commentId) => {
-   
+  const handleDeleteComment = async (postId, commentId) => {
     setDeleteCommentModal(true)
 
     try {
@@ -287,7 +278,6 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
         ...prev,
         [postId]: (prev[postId] || []).filter(comment => comment._id !== commentId),
       }))
-      
     } catch (error) {
       console.error('Error deleting comment:', error)
     } finally {
@@ -383,7 +373,6 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
     },
     [currentUserId],
   )
-      
 
   const isPostOwner = post => {
     return post.user._id === currentUserId
@@ -398,7 +387,7 @@ export default function PostAndLikes({ activeTab, setActiveTab }) {
         handleDeleteComment={handleDeleteComment}
         loading={loading}
       />
-      
+
       {/* Tabs */}
       <SelectPostAndLikes activeTab={activeTab} setActiveTab={setActiveTab} />
 

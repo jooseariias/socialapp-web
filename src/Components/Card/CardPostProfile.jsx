@@ -39,7 +39,7 @@ export default function CardPostProfile(props) {
     isPostOwner,
     handleDeletePost,
     handleDeleteComment,
-   
+
   } = props
 
   // ESTADOS LOCALES
@@ -269,11 +269,10 @@ export default function CardPostProfile(props) {
             <button
               onClick={() => handleAddComment(post._id)}
               disabled={!newComment.trim()}
-              className={`relative flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition-all duration-300 ${
-                newComment.trim()
+              className={`relative flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition-all duration-300 ${newComment.trim()
                   ? 'bg-gradient-to-r from-purple-600 via-purple-500 to-purple-500 text-white shadow-lg shadow-purple-500/25 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/35 active:scale-95'
                   : 'cursor-not-allowed bg-white/5 text-white/30'
-              }`}
+                }`}
             >
               <FaPaperPlane size={14} />
               <span>Comment</span>
@@ -408,7 +407,7 @@ export default function CardPostProfile(props) {
       </AnimatePresence>
 
       {/* MODAL DE ELIMINACIÓN - Responsive */}
-      
+
 
       {/* MODAL IMAGEN FULL - Completamente Responsive */}
       <AnimatePresence>
